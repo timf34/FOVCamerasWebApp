@@ -7,8 +7,8 @@ class JetsonStatus extends React.Component {
     }
 
     componentDidMount() {
-        // Replace with the actual API endpoint
-        fetch('http://localhost:3000/api/status')
+        // Replace with the actual API endpoint (configured for our Python Flask server)
+        fetch('http://localhost:5000/api/status')
             .then(response => response.json())
             .then(data => this.setState({ status: data }));
     }
