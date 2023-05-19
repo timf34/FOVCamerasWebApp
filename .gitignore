@@ -5,6 +5,7 @@
 /client/node_modules
 /server/node_modules
 /server/env
+/keys
 /.pnp
 .pnp.js
 
