@@ -5,7 +5,11 @@
 /client/node_modules
 /server/node_modules
 /server/env
+
+# Keys
 /keys
+server/firebase_config.json
+
 /.pnp
 .pnp.js
 
