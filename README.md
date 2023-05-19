@@ -18,7 +18,7 @@ The project is divided into two parts:
 
 ### Starting the Server
 
-For Node.js server:
+<!-- For Node.js server:
 
 1. Navigate into the `server` directory from the terminal:
     ```bash
@@ -33,7 +33,7 @@ For Node.js server:
     node server.js
     ```
 
-The server will run on [http://localhost:3000](http://localhost:3000).
+The server will run on [http://localhost:3000](http://localhost:3000). -->
 
 For Python server:
 
@@ -41,11 +41,30 @@ For Python server:
     ```bash
     cd server
     ```
-2. Install the necessary packages:
+2. Create activate a virtual environment (venv):
+   - Windows:
+     - Create a venv:
+         ```bash
+        python -m venv venv
+        ```
+      - Activate the venv:
+        ```bash
+         venv\Scripts\activate
+        ```
+    - Linux/macOS:
+      - Create a venv:
+        ```bash
+        python3 -m venv venv
+        ```
+      - Activate the venv:
+        ```bash
+        source venv/bin/activate
+        ```
+3. Install the necessary packages:
     ```bash
     pip install flask flask_cors
     ```
-3. Start the server:
+4. Start the server:
     ```bash
     python server.py
     ```
