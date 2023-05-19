@@ -6,8 +6,9 @@ import io from 'socket.io-client';
 function App() {
     const [status, setStatus] = useState(null);
     const [user, setUser] = useState(null);
-    const [email, setEmail] = useState('');  // Add these lines
-    const [password, setPassword] = useState('');  // Add these lines
+    const [email, setEmail] = useState('');  
+    const [password, setPassword] = useState(''); 
+    const [errorMessage, setErrorMessage] = useState(null);
   
     useEffect(() => {
       const socket = io('http://localhost:5000');
@@ -29,13 +30,15 @@ function App() {
       });
     }, []);
   
-    const handleLogin = async () => { // remove email and password parameters
-      try {
-        await signInWithEmailAndPassword(auth, email, password); // use state values
-      } catch (error) {
-        console.error('Failed to sign in:', error);
-      }
-    };
+    const handleLogin = async () => {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          setErrorMessage(null); // Clear error message on successful sign-in
+        } catch (error) {
+          console.error('Failed to sign in:', error);
+          setErrorMessage('Failed to sign in'); // Set error message on failure
+        }
+      };
   
     return (
       <div className="App">
@@ -44,6 +47,7 @@ function App() {
             <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} /> {/* Add onChange handler */}
             <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} /> {/* Add onChange handler */}
             <button onClick={handleLogin}>Sign In</button> {/* Remove hardcoded values */}
+            {errorMessage && <p>{errorMessage}</p>} {/* Show error message when it exists */}
           </div>
         ) : status ? (
           <div>
