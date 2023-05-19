@@ -62,7 +62,7 @@ For Python server:
         ```
 3. Install the necessary packages:
     ```bash
-    pip install flask flask_cors
+    pip install -r requirements.txt
     ```
 4. Start the server:
     ```bash
