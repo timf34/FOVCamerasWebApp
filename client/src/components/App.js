@@ -4,7 +4,7 @@ import { auth } from './firebase';
 import io from 'socket.io-client';
 
 function App() {
-    const [status, setStatus] = useState(null);
+    const [status, setStatus] = useState([]);
     const [user, setUser] = useState(null);
     const [email, setEmail] = useState('');  
     const [password, setPassword] = useState(''); 
@@ -18,7 +18,16 @@ function App() {
       });
   
       socket.on('status', (data) => {
-        setStatus(data);
+        setStatus(oldStatuses => {
+          const newStatuses = [...oldStatuses];
+          const index = newStatuses.findIndex(status => status.deviceId === data.deviceId);
+          if (index === -1) {
+              newStatuses.push(data);
+          } else {
+              newStatuses[index] = data;
+          }
+          return newStatuses;
+        });
       });
   
       return () => socket.disconnect();
@@ -33,10 +42,10 @@ function App() {
     const handleLogin = async () => {
         try {
           await signInWithEmailAndPassword(auth, email, password);
-          setErrorMessage(null); // Clear error message on successful sign-in
+          setErrorMessage(null);
         } catch (error) {
           console.error('Failed to sign in:', error);
-          setErrorMessage('Failed to sign in'); // Set error message on failure
+          setErrorMessage('Failed to sign in');
         }
       };
   
@@ -44,17 +53,21 @@ function App() {
       <div className="App">
         {!user ? (
           <div>
-            <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} /> {/* Add onChange handler */}
-            <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} /> {/* Add onChange handler */}
-            <button onClick={handleLogin}>Sign In</button> {/* Remove hardcoded values */}
-            {errorMessage && <p>{errorMessage}</p>} {/* Show error message when it exists */}
+            <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
+            <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
+            <button onClick={handleLogin}>Sign In</button>
+            {errorMessage && <p>{errorMessage}</p>}
           </div>
-        ) : status ? (
+        ) : status.length ? (
           <div>
-            <p>Device ID: {status.deviceId}</p>
-            <p>WiFi Status: {status.wifiStatus ? 'Connected' : 'Disconnected'}</p>
-            <p>Battery Level: {status.batteryLevel}</p>
-            <p>Temperature: {status.temperature}</p>
+            {status.map(deviceStatus => (
+              <div key={deviceStatus.deviceId}>
+                <p>Device ID: {deviceStatus.deviceId}</p>
+                <p>WiFi Status: {deviceStatus.wifiStatus ? 'Connected' : 'Disconnected'}</p>
+                <p>Battery Level: {deviceStatus.batteryLevel}</p>
+                <p>Temperature: {deviceStatus.temperature}</p>
+              </div>
+            ))}
           </div>
         ) : (
           <p>Loading status...</p>
@@ -63,4 +76,4 @@ function App() {
     );
   }
   
-  export default App;  
+export default App;
