@@ -1,3 +1,6 @@
+// Note: going to stick with a Python Flask backend as that's what
+// I know best and will be fastest to develop. 
+
 const express = require('express');
 const app = express();
 const cors = require('cors');
