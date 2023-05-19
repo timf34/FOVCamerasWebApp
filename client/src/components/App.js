@@ -16,6 +16,7 @@ function App() {
 
     socket.on('status', (data) => {
       setStatus(data);
+      console.log("Received status data:", data);
     });
 
     // Clean up on unmount
@@ -42,7 +43,7 @@ function App() {
         <div>
           <input type="email" placeholder="Email" />
           <input type="password" placeholder="Password" />
-          <button onClick={() => handleLogin('tim@fov.ie', 'password here!')}>Sign In</button>
+          <button onClick={() => handleLogin('tim@fov.ie', 'shopkeeper2')}>Sign In</button>
         </div>
       ) : status ? (
         <div>
