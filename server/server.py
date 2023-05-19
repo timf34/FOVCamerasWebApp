@@ -34,17 +34,30 @@ def authenticate(f):
             return jsonify({"message": "Invalid token"}), 401
     return decorated_function
 
+# Initialize status variable
 status = {
-    'deviceId': 'jetson_nano_1',
+    'deviceId': 'jetson_nano_x',
     'wifiStatus': True,
     'batteryLevel': 91,
     'temperature': 40
 }
 
-@app.route('/api/status')
+# Test mode flag
+test_mode = False
+
+@app.route('/api/status', methods=['GET'])
 @authenticate
 def get_status(user): # User's data is now available as parameter
     return jsonify(status)
+
+@app.route('/api/status', methods=['POST'])
+def post_status():
+    global status
+    if not test_mode:
+        status = request.get_json()
+    print(f"Received data: {status}")  # For debugging
+    # Save data to the Firebase database...
+    return jsonify({"message": "Data received"}), 200
 
 import threading
 
@@ -61,12 +74,10 @@ def send_status_updates():
             socketio.sleep(1) # Sleep for 1 second
             socketio.emit('status', status) # Emit the status data on the 'status' channel
 
-
 def signal_handler(signal, frame):
     print('Stopping the server...')
     stop_event.set()  # Signal the background task to stop
     exit(0)  # Exit the program
-
 
 signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
 
@@ -76,4 +87,3 @@ if __name__ == '__main__':
         socketio.run(app, port=5000)
     except KeyboardInterrupt:
         signal_handler(signal.SIGINT, None)
-
