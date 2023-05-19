@@ -45,11 +45,11 @@ For Python server:
    - Windows:
      - Create a venv:
          ```bash
-        python -m venv venv
+        python -m venv env
         ```
       - Activate the venv:
         ```bash
-         venv\Scripts\activate
+         env\Scripts\activate
         ```
     - Linux/macOS:
       - Create a venv:
