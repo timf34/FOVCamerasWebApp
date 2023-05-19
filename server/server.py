@@ -4,6 +4,8 @@ from flask_socketio import SocketIO
 import time
 import pyrebase
 import json
+import signal
+import threading
 from functools import wraps
 
 with open('firebase_config.json') as f:
@@ -44,16 +46,34 @@ status = {
 def get_status(user): # User's data is now available as parameter
     return jsonify(status)
 
+import threading
+
+stop_event = threading.Event()
+
 def send_status_updates():
-    while True:
+    while not stop_event.is_set():
         for i in range(0, 100):
+            if stop_event.is_set():
+                break
             status['batteryLevel'] = i
             status['temperature'] = i
             status['wifiStatus'] = not status['wifiStatus']
             socketio.sleep(1) # Sleep for 1 second
             socketio.emit('status', status) # Emit the status data on the 'status' channel
 
+
+def signal_handler(signal, frame):
+    print('Stopping the server...')
+    stop_event.set()  # Signal the background task to stop
+    exit(0)  # Exit the program
+
+
+signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
+
 if __name__ == '__main__':
-    socketio.start_background_task(send_status_updates) # Start sending status updates in the background
-    socketio.run(app, port=5000)
+    socketio.start_background_task(send_status_updates)  # Start sending status updates in the background
+    try:
+        socketio.run(app, port=5000)
+    except KeyboardInterrupt:
+        signal_handler(signal.SIGINT, None)
 
