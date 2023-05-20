@@ -1,7 +1,7 @@
+from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import time
 import pyrebase
 import json
 import signal
@@ -13,10 +13,11 @@ with open('firebase_config.json') as f:
 
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
+db = firebase.database()
 
 app = Flask(__name__)
-CORS(app) # This allows cross-origin requests
-socketio = SocketIO(app, cors_allowed_origins="*") # Enable SocketIO and allow cross-origin requests
+CORS(app)  # This allows cross-origin requests
+socketio = SocketIO(app, cors_allowed_origins="*")  # Enable SocketIO and allow cross-origin requests
 
 # A decorator to authenticate requests
 def authenticate(f):
@@ -34,45 +35,52 @@ def authenticate(f):
             return jsonify({"message": "Invalid token"}), 401
     return decorated_function
 
-# Initialize status variable
-status = {
-    'deviceId': 'jetson_nano_x',
-    'wifiStatus': True,
-    'batteryLevel': 91,
-    'temperature': 40
-}
+# Initialize status dictionary
+status = {}
 
-# Test mode flag
-test_mode = False
+# Initialize stop_event
+stop_event = threading.Event()
 
 @app.route('/api/status', methods=['GET'])
 @authenticate
-def get_status(user): # User's data is now available as parameter
+def get_status(user):  # User's data is now available as parameter
     return jsonify(status)
 
 @app.route('/api/status', methods=['POST'])
 def post_status():
     global status
-    if not test_mode:
-        status = request.get_json()
-    print(f"Received data: {status}")  # For debugging
-    # Save data to the Firebase database...
+    data = request.get_json()
+    deviceId = data['deviceId']
+    status[deviceId] = {
+        'status': data,
+        'last_seen': datetime.now()
+    }
+
+    print(f"Received data: {status[deviceId]}")  # For debugging
+    # db.child("statuses").child(status['deviceId']).set(status)  # Push the status update to Firebase
     return jsonify({"message": "Data received"}), 200
-
-import threading
-
-stop_event = threading.Event()
 
 def send_status_updates():
     while not stop_event.is_set():
-        for i in range(0, 100):
+        # Make a copy of the items
+        items = list(status.items())
+        for deviceId, device in items:
             if stop_event.is_set():
+                print("Stop event set, breaking loop.")  # For debugging
                 break
-            status['batteryLevel'] = i
-            status['temperature'] = i
-            status['wifiStatus'] = not status['wifiStatus']
-            socketio.sleep(1) # Sleep for 1 second
-            socketio.emit('status', status) # Emit the status data on the 'status' channel
+            if datetime.now() - device['last_seen'] > timedelta(seconds=10):
+                # If we haven't heard from the device in more than 10 seconds,
+                # mark it as disconnected and send a status update
+                print(f"Device {deviceId} is disconnected.")  # For debugging
+                device['status']['wifiStatus'] = False
+                socketio.emit('status', {deviceId: device['status']})
+            else:
+                # If the device is still connected, update its status as before
+                print(f"Sending status update for device {deviceId}.")  # For debugging
+                socketio.emit('status', {deviceId: device['status']})
+            socketio.sleep(1)  # Sleep for 1 second
+
+
 
 def signal_handler(signal, frame):
     print('Stopping the server...')

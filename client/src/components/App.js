@@ -11,27 +11,31 @@ function App() {
     const [errorMessage, setErrorMessage] = useState(null);
   
     useEffect(() => {
-      const socket = io('http://localhost:5000');
-  
-      socket.on('connect', () => {
-        console.log('connected to websocket');
-      });
-  
-      socket.on('status', (data) => {
-        setStatus(oldStatuses => {
-          const newStatuses = [...oldStatuses];
-          const index = newStatuses.findIndex(status => status.deviceId === data.deviceId);
-          if (index === -1) {
-              newStatuses.push(data);
-          } else {
-              newStatuses[index] = data;
-          }
-          return newStatuses;
+        const socket = io('http://localhost:5000');
+    
+        socket.on('connect', () => {
+            console.log('connected to websocket dawg');
         });
-      });
-  
-      return () => socket.disconnect();
+    
+        socket.on('status', (data) => {
+            setStatus(oldStatuses => {
+                const newStatuses = [...oldStatuses];
+                const deviceId = Object.keys(data)[0];
+                const status = data[deviceId];
+                const index = newStatuses.findIndex(status => status.deviceId === deviceId);
+                if (index === -1) {
+                    newStatuses.push(status);
+                } else {
+                    newStatuses[index] = status;
+                }
+                return newStatuses;
+            });
+            console.log('status', data);
+        });
+    
+        return () => socket.disconnect();
     }, []);
+    
   
     useEffect(() => {
       onAuthStateChanged(auth, (currentUser) => {
