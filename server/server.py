@@ -41,6 +41,13 @@ class Server:
 
         self.enable_socketio = enable_socketio
 
+        # Create the 'statuses' child node if it doesn't exist
+        try:
+            Server.db.child("statuses").get()
+        except:
+            Server.db.child("statuses").set({})
+
+
         @self.app.route('/api/status', methods=['GET'])
         @authenticate
         def get_status(user): 
@@ -52,7 +59,7 @@ class Server:
             deviceId = data['deviceId']
             self.status[deviceId] = {
                 'status': data,
-                'last_seen': datetime.now()
+                'last_seen': datetime.now().isoformat()
             }
 
             print(f"Received data: {self.status[deviceId]}")  # For debugging
@@ -65,7 +72,8 @@ class Server:
                 if self.stop_event.is_set():
                     print("Stop event set, breaking loop.")  # For debugging
                     break
-                if datetime.now() - device['last_seen'] > timedelta(seconds=10):
+                last_seen = datetime.fromisoformat(device['last_seen'])
+                if datetime.now() - last_seen > timedelta(seconds=10):
                     print(f"Device {deviceId} is disconnected.")  # For debugging
                     device['status']['wifiStatus'] = False
                     if self.enable_socketio:
@@ -74,7 +82,9 @@ class Server:
                     if self.enable_socketio:
                         print(f"Sending status update for device {deviceId}.")  # For debugging
                         self.socketio.emit('status', {deviceId: device['status']})
+
                 # Push the status update to Firebase
+                print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
                 Server.db.child("statuses").child(deviceId).set(device)
                 self.socketio.sleep(1)  # Sleep for 1 second
 
