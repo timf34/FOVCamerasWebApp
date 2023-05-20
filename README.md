@@ -68,6 +68,10 @@ For Python server:
     ```bash
     python server.py
     ```
+5. Start the Jetson simulator:
+   ```bash
+    python jetson_simulator.py [device-id]
+    ```
 
 The server will run on [http://localhost:5000](http://localhost:5000).
 
