@@ -30,7 +30,6 @@ function App() {
                 }
                 return newStatuses;
             });
-            console.log('status', data);
         });
     
         return () => socket.disconnect();
