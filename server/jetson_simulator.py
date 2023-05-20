@@ -20,7 +20,7 @@ import random
 
 def get_wifi_status():
     # randomly return True or False
-    return bool(random.getrandbits(1))
+    return True
 
 def get_battery_level():
     # randomly return a number between 0 and 100
