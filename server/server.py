@@ -32,12 +32,14 @@ class Server:
     auth = firebase.auth()
     db = firebase.database()
 
-    def __init__(self):
+    def __init__(self, enable_socketio: bool=True):
         self.app = Flask(__name__)
         CORS(self.app) 
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")  
         self.status = {}
         self.stop_event = threading.Event()
+
+        self.enable_socketio = enable_socketio
 
         @self.app.route('/api/status', methods=['GET'])
         @authenticate
@@ -58,7 +60,6 @@ class Server:
 
     def send_status_updates(self):
         while not self.stop_event.is_set():
-            # Make a copy of the items
             items = list(self.status.items())
             for deviceId, device in items:
                 if self.stop_event.is_set():
@@ -67,10 +68,14 @@ class Server:
                 if datetime.now() - device['last_seen'] > timedelta(seconds=10):
                     print(f"Device {deviceId} is disconnected.")  # For debugging
                     device['status']['wifiStatus'] = False
-                    self.socketio.emit('status', {deviceId: device['status']})
+                    if self.enable_socketio:
+                        self.socketio.emit('status', {deviceId: device['status']})
                 else:
-                    print(f"Sending status update for device {deviceId}.")  # For debugging
-                    self.socketio.emit('status', {deviceId: device['status']})
+                    if self.enable_socketio:
+                        print(f"Sending status update for device {deviceId}.")  # For debugging
+                        self.socketio.emit('status', {deviceId: device['status']})
+                # Push the status update to Firebase
+                Server.db.child("statuses").child(deviceId).set(device)
                 self.socketio.sleep(1)  # Sleep for 1 second
 
 
@@ -82,7 +87,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
 
 if __name__ == '__main__':
-    server = Server()
+    server = Server(enable_socketio=False)
     server.socketio.start_background_task(server.send_status_updates)
     try:
         server.socketio.run(server.app, port=5000)
