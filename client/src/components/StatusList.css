@@ -1,0 +1,17 @@
+.status-box {
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid black;
+}
+
+.connected {
+    background-color: lightgreen;
+    color: black;
+}
+
+.disconnected {
+    background-color: lightcoral;
+    color: black;
+}

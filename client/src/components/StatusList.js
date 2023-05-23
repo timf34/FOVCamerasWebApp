@@ -1,4 +1,5 @@
 import React from 'react';
+import './StatusList.css';  
 
 export default function StatusList({ status }) {
   if (!status.length) {
@@ -8,7 +9,7 @@ export default function StatusList({ status }) {
   return (
     <div>
       {status.map(deviceStatus => (
-        <div key={deviceStatus.deviceId}>
+        <div key={deviceStatus.deviceId}  className={`status-box ${deviceStatus.wifiStatus ? 'connected' : 'disconnected'}`}>
           <p>Device ID: {deviceStatus.deviceId}</p>
           <p>WiFi Status: {deviceStatus.wifiStatus ? 'Connected' : 'Disconnected'}</p>
           <p>Battery Level: {deviceStatus.batteryLevel}</p>
