@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Login from './Login';
 import StatusList from './StatusList';
-import useWebSocketStatus from './useWebSocketStatus';
+import useStatus from './useStatus';
 import useAuth from './useAuth';
 
 export default function App() {
-  const status = useWebSocketStatus();
+  const [useFirebase, setUseFirebase] = useState(true);  // set to true to use firebase database listening, false to use websocket listening
+
+  const status = useStatus(useFirebase);
   const { user, email, setEmail, password, setPassword, errorMessage, handleLogin } = useAuth();
+
+  console.log("status:", status);
 
   return (
     <div className="App">
