@@ -97,7 +97,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
 
 if __name__ == '__main__':
-    server = Server(enable_socketio=False)
+    server = Server(enable_socketio=True)
     server.socketio.start_background_task(server.send_status_updates)
     try:
         server.socketio.run(server.app, port=5000)

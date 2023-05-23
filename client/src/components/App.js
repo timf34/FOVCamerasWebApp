@@ -9,6 +9,7 @@ function App() {
     const [email, setEmail] = useState('');  
     const [password, setPassword] = useState(''); 
     const [errorMessage, setErrorMessage] = useState(null);
+    const [useFirebase, setUseFirebase] = useState(false);  // set to true to use firebase database listening, false to use websocket listening
   
     useEffect(() => {
         const socket = io('http://localhost:5000');
