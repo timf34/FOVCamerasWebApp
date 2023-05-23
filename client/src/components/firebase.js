@@ -5,6 +5,7 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyA5bTqNoQwo2enAjRYTuULwIgsUVY2DGO0",
+  databaseURL: "https://fov-cameras-web-app-default-rtdb.europe-west1.firebasedatabase.app",
   authDomain: "fov-cameras-web-app.firebaseapp.com",
   projectId: "fov-cameras-web-app",
   storageBucket: "fov-cameras-web-app.appspot.com",
