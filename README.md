@@ -95,3 +95,24 @@ The application will run on [http://localhost:3000](http://localhost:3000) if yo
 ## Testing
 
 You can test the server by navigating to the `/api/status` endpoint (e.g., [http://localhost:3000/api/status](http://localhost:3000/api/status)) in your web browser. You should see a JSON object with the status of the Jetson device.
+
+## Running 
+
+1. Start the server.
+```bash
+cd server
+env\Scripts\activate
+python server.py
+```
+
+2. Start the Jetson simulator.
+```bash
+python jetson_simulator.py [device-id]
+```
+
+3. Start the client.
+```bash
+cd client
+npm start
+```
+
