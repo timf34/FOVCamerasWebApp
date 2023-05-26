@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials, auth, db
 import json
 import signal
-import threading
+import threading    
 from functools import wraps
 
 
@@ -21,9 +22,15 @@ def authenticate(f):
         if not id_token:
             return jsonify({"message": "Token required"}), 401
         try:
-            user = server.auth.verify_id_token(id_token)
-            return f(user, *args, **kws)
-        except:
+            decoded_token = auth.verify_id_token(id_token)
+            # user = auth.get_user(decoded_token['uid'])
+            # Convert decoded token to a dictionary
+            decoded_token = decoded_token.items()
+            # for key, value in decoded_token:
+            #     print(f"{key}: {value}")
+            return f(decoded_token, *args, **kws)
+        except Exception as e:
+            print(f"Error: {e}")
             return jsonify({"message": "Invalid token"}), 401
     return decorated_function
 
@@ -33,9 +40,13 @@ class Server:
     def __init__(self, enable_socketio: bool=True, enable_db_uploading: bool=False):
         with open('firebase_config.json') as f:
             self.firebase_config = json.load(f)
-        self.firebase = pyrebase.initialize_app(self.firebase_config)
-        self.auth = self.firebase.auth()
-        self.db = self.firebase.database()
+
+        # self.firebase = pyrebase.initialize_app(self.firebase_config)
+        cred = firebase_admin.credentials.Certificate("../keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
+        default_app = firebase_admin.initialize_app(cred, options=self.firebase_config)
+
+        self.auth = auth
+        self.db = db
         self.connections = {}
         self.app = Flask(__name__)
         CORS(self.app)
@@ -46,9 +57,10 @@ class Server:
         self.enable_db_uploading = enable_db_uploading
 
         try:
-            self.db.child("statuses").get()
+            self.db.reference('statuses').get()
         except:
-            self.db.child("statuses").set({})
+            self.db.reference('statuses').document().set({})
+
 
 
 def handle_device_id(device_id):
@@ -86,10 +98,13 @@ def post_command(user):
     data = request.get_json()
     deviceId = data['deviceId']
     command = data['command']
+    print(f"Received command: {command} and deviceID: {deviceId}")  # For debugging
     if deviceId in server.connections:
+        print("Server connections1: ", server.connections)
         server.socketio.emit('command', command, room=server.connections[deviceId])
         return jsonify({"message": "Command sent"}), 200
     else:
+        print("Server connections2: ", server.connections)
         return jsonify({"message": "Device not connected"}), 400
 
 
@@ -121,8 +136,9 @@ def send_status_updates():
             if server.enable_db_uploading:
                 # Push the status update to Firebase
                 print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
-                server.db.child("statuses").child(deviceId).set(device)
-            server.socketio.sleep(2)  # Sleep for 2 seconds
+                server.db.reference('statuses').child(deviceId).set(device)
+
+            server.socketio.sleep(5)  # Sleep for 2 seconds
 
 
 def signal_handler(signal, frame):
