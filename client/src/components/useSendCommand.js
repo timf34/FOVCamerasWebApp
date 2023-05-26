@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { auth } from './firebase'; // Assuming firebase.js and CommandButton.js are in the same directory
+import { auth } from './firebase'; 
 
 export default function CommandButton() {
-    // TODO: the deviceID can't be hardcdoed here as it is!
-    const [deviceId, setDeviceId] = useState('jetson1'); // Set to your device's ID
+    const [deviceId, setDeviceId] = useState('jetson1'); 
     const [command, setCommand] = useState('print hello world');
 
     const sendCommand = async () => {
@@ -37,8 +36,16 @@ export default function CommandButton() {
     };
 
     return (
-        <button onClick={sendCommand}>
-            Send Command
-        </button>
+        <div>
+            <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
+                <option value="jetson1">jetson1</option>
+                <option value="jetson2">jetson2</option>
+                <option value="jetson3">jetson3</option>
+                <option value="jetson4">jetson4</option>
+            </select>
+            <button onClick={sendCommand}>
+                Send Command
+            </button>
+        </div>
     );
 }
