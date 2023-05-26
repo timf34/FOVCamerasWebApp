@@ -41,6 +41,8 @@ class NamespaceHandler(Client):
     def on_message(self, data):
         print('Received message:', data)
 
+    def on_command(self, data):  # This function listens for the 'command' event
+        print('Received command:', data)
 
 # Device ID as a command line argument
 import sys
@@ -54,6 +56,12 @@ sio = NamespaceHandler()
 
 # Connect to the server
 sio.connect('http://localhost:5000')
+
+# Register event handlers
+sio.on('connect', sio.on_connect)
+sio.on('disconnect', sio.on_disconnect)
+sio.on('message', sio.on_message)
+sio.on('command', sio.on_command)  # Listen for 'command' event
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)
@@ -91,3 +99,5 @@ try:
     sio.wait()
 finally:
     sio.disconnect()
+    
+# TODO: I can't CTRL + C out of this script as it currently is!
