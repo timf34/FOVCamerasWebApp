@@ -99,5 +99,8 @@ try:
     sio.wait()
 finally:
     sio.disconnect()
-    
+
 # TODO: I can't CTRL + C out of this script as it currently is!
+
+# TODO: Jetson2 seems to frequently disconnect on the server... why is this? But jetson1 is always connected
+#  even when I run it 2nd after jetson2... not sure what's going on here.
