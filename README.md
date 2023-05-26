@@ -116,3 +116,6 @@ cd client
 npm start
 ```
 
+Also note to be sure to run `server.py` before running `jetson_simulator.py [device_id]` to 
+ensure that there is a server there for the device to connect to (and so its ID is properly 
+added to the list of connections).
