@@ -16,8 +16,8 @@ import requests
 import json
 import random
 import time
-import websocket
-import threading 
+import threading
+from socketio import Client
 
 def get_wifi_status():
     # randomly return True or False
@@ -31,22 +31,16 @@ def get_temperature():
     # randomly return a number between 0 and 100
     return random.randint(0, 100)
 
-def on_message(ws, message):
-    print(f'Received command: {message}')
-    # TODO: Handle command...
+class NamespaceHandler(Client):
+    def on_connect(self):
+        print('Connected to the server')
 
-def on_error(ws, error):
-    print(f'Error: {error}')
+    def on_disconnect(self):
+        print('Disconnected from the server')
 
-def on_close(ws):
-    print('Connection closed')
+    def on_message(self, data):
+        print('Received message:', data)
 
-def on_open(ws):
-    def run():
-        while True:
-            time.sleep(1)
-    thread = threading.Thread(target=run)
-    thread.start()
 
 # Device ID as a command line argument
 import sys
@@ -56,38 +50,44 @@ if len(sys.argv) != 2:
 
 deviceId = sys.argv[1]
 
-# Create a new WebSocket connection
-ws = websocket.WebSocketApp(
-    f"ws://localhost:5000/{deviceId}",
-    on_open=on_open,
-    on_message=on_message,
-    on_error=on_error,
-    on_close=on_close)
+sio = NamespaceHandler()
 
-# Start the WebSocket connection in a new thread so it doesn't block the main loop
-wst = threading.Thread(target=ws.run_forever)
-wst.start()
+# Connect to the server
+sio.connect('http://localhost:5000')
 
-while True:
-    try:
-        data = {
-            'deviceId': deviceId,
-            'wifiStatus': get_wifi_status(),
-            'batteryLevel': get_battery_level(),
-            'temperature': get_temperature()
-        }
+# Emit the device_id event
+sio.emit('device_id', deviceId)
+
+# Start a new thread for periodically sending status updates
+def send_status_updates():
+    while True:
+        try:
+            data = {
+                'deviceId': deviceId,
+                'wifiStatus': get_wifi_status(),
+                'batteryLevel': get_battery_level(),
+                'temperature': get_temperature()
+            }
+            
+            response = requests.post('http://localhost:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            
+            if response.status_code == 200:
+                print('Data sent successfully')
+                print(data)
+            else:
+                print('Failed to send data')
         
-        response = requests.post('http://localhost:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
-        
-        if response.status_code == 200:
-            print('Data sent successfully')
-            print(data)
-        else:
-            print('Failed to send data')
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        print(f"Response status code: {response.status_code}")
-        print(f"Response content: {response.content}")
+        except Exception as e:
+            print(f"Error: {e}")
+            print(f"Response status code: {response.status_code}")
+            print(f"Response content: {response.content}")
 
-    time.sleep(5)  # Wait for 10 seconds before sending the next status update
+        time.sleep(5)  # Wait for 5 seconds before sending the next status update
+
+status_thread = threading.Thread(target=send_status_updates)
+status_thread.start()
+
+try:
+    sio.wait()
+finally:
+    sio.disconnect()
