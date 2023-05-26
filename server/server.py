@@ -1,7 +1,7 @@
 # TODO: refactor this file soon. 
 
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import firebase_admin
@@ -81,6 +81,11 @@ def get_status(user):
     return jsonify(server.status)
 
 
+def video():
+    print("Sending video")
+    return send_from_directory(directory='../data/', path='sample_vid.mp4', mimetype='video/mp4')
+
+
 def post_status():
     data = request.get_json()
     deviceId = data['deviceId']
@@ -114,6 +119,7 @@ def register_routes() -> None:
     server.app.route('/api/status', methods=['GET'])(get_status)
     server.app.route('/api/status', methods=['POST'])(post_status)
     server.app.route('/api/command', methods=['POST'])(post_command)
+    server.app.route('/api/video', methods=['GET'])(video)
 
 
 def send_status_updates():

@@ -4,6 +4,7 @@ import StatusList from './StatusList';
 import useStatus from './useStatus';
 import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
+import VideoStreamButton from './VideoStreamButton';
 
 export default function App() {
   const [useFirebase, setUseFirebase] = useState(false);  // set to true to use firebase database listening, false to use websocket listening
@@ -21,6 +22,7 @@ export default function App() {
         <div>
           <StatusList status={status} />
           <CommandButton />
+          <VideoStreamButton />
         </div>
       )}
     </div>
