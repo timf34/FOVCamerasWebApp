@@ -1,7 +1,8 @@
 # TODO: refactor this file soon. 
 
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request, send_from_directory
+import cv2
+from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import firebase_admin
@@ -120,6 +121,8 @@ def register_routes() -> None:
     server.app.route('/api/status', methods=['POST'])(post_status)
     server.app.route('/api/command', methods=['POST'])(post_command)
     server.app.route('/api/video', methods=['GET'])(video)
+    server.app.route('/api/video_feed', methods=['GET'])(video_feed)
+
 
 
 def send_status_updates():
@@ -151,6 +154,28 @@ def signal_handler(signal, frame):
     print('Stopping the server...')
     server.stop_event.set()
     exit(0)  # Exit the program
+
+
+def gen_frames():
+    # Connect to the video stream
+    print("gen frames")
+    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
+    print("cap is open: ", cap.isOpened())
+    while True:
+        success, frame = cap.read()  # read the camera frame
+        print("success: ", success)
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
+def video_feed():
+    print("Sending video feed")
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':
