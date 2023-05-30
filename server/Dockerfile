@@ -1,64 +1,109 @@
 FROM ubuntu:20.04
 
-RUN apt-get update 
-RUN apt-get upgrade -y
+# Avoid timezone prompt during packages installation
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Install gstreamer and opencv dependencies
-RUN \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+# Update and install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    qt5-default \
+    unzip \
+    yasm \
+    pkg-config \
+    libswscale-dev \
+    libtbb2 \
+    libtbb-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libavformat-dev \
+    libavcodec-dev \
+    libavutil-dev \
+    libpostproc-dev \
+    libswscale-dev \
+    libeigen3-dev \
+    libtbb-dev \
+    libgtk2.0-dev \
+    pkg-config \
+    python3-dev \
+    python3-numpy \
+    python3-pip \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav \
+    gstreamer1.0-doc \
+    gstreamer1.0-tools \
+    gstreamer1.0-x \
+    gstreamer1.0-alsa \
+    gstreamer1.0-gl \
+    gstreamer1.0-gtk3 \
+    gstreamer1.0-qt5 \
+    gstreamer1.0-pulseaudio \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libavresample-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN \
-	apt-get install -y \
-	libgstreamer1.0-0 \
-	gstreamer1.0-plugins-base \
-	gstreamer1.0-plugins-good \
-	gstreamer1.0-plugins-bad \
-	gstreamer1.0-plugins-ugly \
-	gstreamer1.0-libav \
-	gstreamer1.0-doc \
-	gstreamer1.0-tools \
-	libgstreamer1.0-dev \
-	libgstreamer-plugins-base1.0-dev
+# Download opencv and opencv_contrib
+RUN wget https://github.com/opencv/opencv/archive/4.5.1.zip \
+    && unzip 4.5.1.zip \
+    && rm 4.5.1.zip \
+    && mv opencv-4.5.1 OpenCV \
+    && wget https://github.com/opencv/opencv_contrib/archive/4.5.1.zip \
+    && unzip 4.5.1.zip \
+    && rm 4.5.1.zip \
+    && mv opencv_contrib-4.5.1 OpenCV/opencv_contrib
 
+WORKDIR OpenCV
+# Prepare build 
+RUN mkdir build
+WORKDIR build
+RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D INSTALL_C_EXAMPLES=OFF \
+    -D INSTALL_PYTHON_EXAMPLES=OFF \
+    -D WITH_TBB=ON \
+    -D WITH_V4L=ON \
+    -D WITH_QT=ON \
+    -D WITH_OPENGL=ON \
+    -D WITH_VTK=ON \
+    -D OPENCV_GENERATE_PKGCONFIG=ON \
+    -D OPENCV_PC_FILE_NAME=opencv.pc \
+    -D OPENCV_ENABLE_NONFREE=ON \
+    -D OPENCV_PYTHON3_INSTALL_PATH=/usr/local/lib/python3.8/site-packages \
+    -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
+    -D BUILD_EXAMPLES=OFF \
+    -D WITH_GSTREAMER=ON ..
 
-RUN apt-get install -y git
+# Compile and install OpenCV with contrib modules
+RUN make -j4 && make install && ldconfig
 
+WORKDIR /
+# Cleanup
+RUN rm -rf OpenCV
 
-# setup python
-RUN apt-get install -y python3-pip
+# ...
+# After building and installing OpenCV
 
-# get opencv and build it
-RUN git clone https://github.com/opencv/opencv.git
-
-RUN apt-get install -y build-essential libssl-dev
-
-RUN apt-get -y install cmake
-
-RUN \
-	cd opencv && \
-	git checkout 4.5.4 && \
-	git submodule update --recursive --init && \
-	mkdir build && \
-	cd build && \
-	cmake -D CMAKE_BUILD_TYPE=RELEASE \
-	-D INSTALL_PYTHON_EXAMPLES=ON \
-	-D INSTALL_C_EXAMPLES=OFF \
-	-D PYTHON_EXECUTABLE=$(which python3) \
-	-D BUILD_opencv_python2=OFF \
-	-D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
-	-D PYTHON3_EXECUTABLE=$(which python3) \
-	-D PYTHON3_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-	-D PYTHON3_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
-	-D WITH_GSTREAMER=ON \
-	-D BUILD_EXAMPLES=ON .. && \
-	make -j$(nproc) && \
-	make install && \
-	ldconfig
-
-COPY . /app
-
+# Set working directory
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+# # Copy requirements file
+# COPY requirements.txt ./
 
-CMD ["python", "server.py"]
+# # Install Python dependencies
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy your application files
+COPY . .
+
+# Expose Flask port
+EXPOSE 5000
+
+# # Set the default command to run your application
+# CMD ["python", "server.py"]
