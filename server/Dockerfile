@@ -33,6 +33,7 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D OPENCV_GENERATE_PKGCONFIG=ON \
     -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
     -D WITH_GSTREAMER=ON \
+    -D PYTHON3_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
     -D BUILD_EXAMPLES=OFF ..
 RUN make -j$(nproc)
 RUN make install
