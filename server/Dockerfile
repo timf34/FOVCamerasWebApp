@@ -40,3 +40,12 @@ RUN make install
 
 # Add the installed libs to the linker search paths
 RUN ldconfig
+
+# Set work directory to /app
+WORKDIR /app
+
+# Copy requirements.txt and install the requirements
+RUN pip3 install Flask flask-cors flask-socketio firebase-admin
+
+# Set up command to run your server.py script using Python 3
+CMD ["python3", "/app/server.py"]
