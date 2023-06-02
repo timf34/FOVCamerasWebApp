@@ -8,6 +8,7 @@ from flask_socketio import SocketIO
 import firebase_admin
 from firebase_admin import credentials, auth, db
 import json
+import os
 import signal
 import threading    
 from functools import wraps
@@ -42,9 +43,11 @@ class Server:
         with open('firebase_config.json') as f:
             self.firebase_config = json.load(f)
 
+        print("Initializing Firebase...")
         # self.firebase = pyrebase.initialize_app(self.firebase_config)
         cred = firebase_admin.credentials.Certificate("./keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
         default_app = firebase_admin.initialize_app(cred, options=self.firebase_config)
+        print("Firebase initialized.")
 
         self.auth = auth
         self.db = db
@@ -53,14 +56,20 @@ class Server:
         CORS(self.app)
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         self.status = {}
+        print("Before threading")
         self.stop_event = threading.Event()
+        print("After threading")
         self.enable_socketio = enable_socketio
         self.enable_db_uploading = enable_db_uploading
 
-        try:
-            self.db.reference('statuses').get()
-        except:
-            self.db.reference('statuses').document().set({})
+        # try:
+        #     print("Before self.db.reference('statuses').get()")
+        #     self.db.reference('statuses').get(timeout=5)  # TODO: this is where the code gets stuck!
+        #     print("After self.db.reference('statuses').get()")
+        # except:
+        #     print("Before self.db.reference('statuses').set({})")
+        #     self.db.reference('statuses').set({})
+        #     print("After self.db.reference('statuses').set({})")
 
 
 
@@ -84,7 +93,18 @@ def get_status(user):
 
 def video():
     print("Sending video")
-    return send_from_directory(directory='./data/', path='sample_vid.mp4', mimetype='video/mp4')
+    # Define the directory and file path
+    directory = './data/'
+    file_path = 'sample_vid.mp4'
+    
+    # Check if ./data/sample_vid.mp4 exists
+    if os.path.isfile(os.path.join(directory, file_path)):
+        # If it does, send it
+        return send_from_directory(directory=directory, path=file_path, as_attachment=True, mimetype='video/mp4')
+    else:
+        # If it doesn't, handle the situation (log an error, raise an exception, return a default file, etc.)
+        print("File not found.")
+        return None
 
 
 def post_status():
@@ -145,7 +165,7 @@ def send_status_updates():
             if server.enable_db_uploading:
                 # Push the status update to Firebase
                 print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
-                server.db.reference('statuses').child(deviceId).set(device)
+                # server.db.reference('statuses').child(deviceId).set(device)  # Note: commenting out to speed up dev. Code is getting stuck initializing db
 
             server.socketio.sleep(5)  # Sleep for 2 seconds
 
@@ -161,7 +181,9 @@ def gen_frames():
     print("gen frames")
     # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
-    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false', cv2.CAP_GSTREAMER)
+
     
     print("cap is open: ", cap.isOpened())
     while True:
