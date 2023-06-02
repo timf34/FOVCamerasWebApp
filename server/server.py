@@ -51,7 +51,7 @@ class StreamManager:
 
     def get_image(self):
         with self.lock:
-            return self.latest_images.get()
+            return self.latest_image
 
 
 class Server:
