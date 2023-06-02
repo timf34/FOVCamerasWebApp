@@ -40,6 +40,20 @@ def authenticate(f):
     return decorated_function
 
 
+class StreamManager:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.latest_image = None
+
+    def update_image(self, image):
+        with self.lock:
+            self.latest_image = image
+
+    def get_image(self):
+        with self.lock:
+            return self.latest_images.get()
+
+
 class Server:
 
     def __init__(self, enable_socketio: bool=True, enable_db_uploading: bool=False):
@@ -64,6 +78,7 @@ class Server:
         print("After threading")
         self.enable_socketio = enable_socketio
         self.enable_db_uploading = enable_db_uploading
+        self.stream_manager = StreamManager()
 
         # try:
         #     print("Before self.db.reference('statuses').get()")
@@ -144,8 +159,8 @@ def register_routes() -> None:
     server.app.route('/api/status', methods=['POST'])(post_status)
     server.app.route('/api/command', methods=['POST'])(post_command)
     server.app.route('/api/video', methods=['GET'])(video)
-    server.app.route('/api/video_feed', methods=['GET'])(video_feed)
-    server.app.route('/api/new_stream', methods=['POST'])(new_streaming_method)
+    server.app.route('/api/image', methods=['GET'])(get_image)
+    server.app.route('/api/image', methods=['POST'])(new_streaming_method)
 
 
 
@@ -187,49 +202,20 @@ def new_streaming_method():
     print("new_streaming_method")
     print("Image shape: ", img.shape)
 
-    # cv2.imshow('frame', img)
-    # cv2.waitKey(1)
+    _, img_encoded = cv2.imencode('.jpg', img)
+    image_data = img_encoded.tobytes()
 
-    # Save the image locally 
-    cv2.imwrite('image.jpg', img)
+    server.stream_manager.update_image(image_data)
 
     return '', 200
 
+def get_image():
+    image_data = server.stream_manager.get_image()
 
-def gen_frames():
-    # Connect to the video stream
-    print("gen frames")
-    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
-    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-    # cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false', cv2.CAP_GSTREAMER)
-    # cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false num-buffers=-1', cv2.CAP_GSTREAMER)
-    print(cap.getBackendName())
-    
-    print("cap is open: ", cap.isOpened())
-    while True:
-        print("Reading cap")
-        success, frame = cap.read()  # read the camera frame
-        print("success: ", success)
+    if image_data is None:
+        return 'No image available', 404
 
-        # Print the frame width and height
-        print('Frame width:', cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        print('Frame height:', cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        # Check if the webcam is opened correctly
-
-        if not success:
-            print("not success")
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
-def video_feed():
-    print("Sending video feed")
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(image_data, mimetype='image/jpeg')
 
 
 if __name__ == '__main__':
