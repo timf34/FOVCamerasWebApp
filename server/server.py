@@ -43,7 +43,7 @@ class Server:
             self.firebase_config = json.load(f)
 
         # self.firebase = pyrebase.initialize_app(self.firebase_config)
-        cred = firebase_admin.credentials.Certificate("../keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
+        cred = firebase_admin.credentials.Certificate("./keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
         default_app = firebase_admin.initialize_app(cred, options=self.firebase_config)
 
         self.auth = auth
@@ -84,7 +84,7 @@ def get_status(user):
 
 def video():
     print("Sending video")
-    return send_from_directory(directory='../data/', path='sample_vid.mp4', mimetype='video/mp4')
+    return send_from_directory(directory='./data/', path='sample_vid.mp4', mimetype='video/mp4')
 
 
 def post_status():
@@ -160,7 +160,9 @@ def gen_frames():
     # Connect to the video stream
     print("gen frames")
     # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
+    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    
     print("cap is open: ", cap.isOpened())
     while True:
         success, frame = cap.read()  # read the camera frame
@@ -179,11 +181,18 @@ def video_feed():
 
 
 if __name__ == '__main__':
+    print("Starting server...")
     server = Server(enable_socketio=True)
+    print("Server started.")
     register_routes()
+    print("Routes registered.")
     server.socketio.start_background_task(send_status_updates)
+    print("Status updates task started.")
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
     try:
-        server.socketio.run(server.app, port=5000)
+        print("Before run")
+        server.socketio.run(server.app, host='0.0.0.0', port=5000)
+        print("After run")
     except KeyboardInterrupt:
+        print("Keyboard interrupt")
         signal_handler(signal.SIGINT, None)
