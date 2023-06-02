@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import cv2
+import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -144,6 +145,7 @@ def register_routes() -> None:
     server.app.route('/api/command', methods=['POST'])(post_command)
     server.app.route('/api/video', methods=['GET'])(video)
     server.app.route('/api/video_feed', methods=['GET'])(video_feed)
+    server.app.route('/api/new_stream', methods=['POST'])(new_streaming_method)
 
 
 
@@ -176,6 +178,22 @@ def signal_handler(signal, frame):
     print('Stopping the server...')
     server.stop_event.set()
     exit(0)  # Exit the program
+
+
+def new_streaming_method():
+    nparr = np.fromstring(request.data, np.uint8)
+    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    print("new_streaming_method")
+    print("Image shape: ", img.shape)
+
+    # cv2.imshow('frame', img)
+    # cv2.waitKey(1)
+
+    # Save the image locally 
+    cv2.imwrite('image.jpg', img)
+
+    return '', 200
 
 
 def gen_frames():
