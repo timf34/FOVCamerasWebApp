@@ -16,7 +16,20 @@ RUN apt install -y build-essential cmake git pkg-config libgtk-3-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev python3-dev python3-numpy \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
-    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+    libgstreamer1.0-0 \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    libgstrtspserver-1.0-0 \
+    libgstrtspserver-1.0-dev \
+    pkg-config \
+    libcairo2-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
 
 # Clone OpenCV's and OpenCV contrib's repositories
 RUN git clone https://github.com/opencv/opencv.git
@@ -47,5 +60,11 @@ WORKDIR /app
 # Copy requirements.txt and install the requirements
 RUN pip3 install Flask flask-cors flask-socketio firebase-admin
 
+# Expose the necessary port
+EXPOSE 5000
+
 # Set up command to run your server.py script using Python 3
-CMD ["python3", "/app/server.py"]
+# CMD ["flask", "run","--host","0.0.0.0","--port","5000"]
+# CMD ["python3", "app.py"]
+
+CMD ["python3", "server.py"]
