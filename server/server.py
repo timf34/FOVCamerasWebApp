@@ -13,6 +13,8 @@ import signal
 import threading    
 from functools import wraps
 
+os.environ['GST_DEBUG'] = '3'
+
 
 # A decorator to authenticate requests
 def authenticate(f):
@@ -179,17 +181,27 @@ def signal_handler(signal, frame):
 def gen_frames():
     # Connect to the video stream
     print("gen frames")
-    # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! appsink', cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture('udpsrc port=5000 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! h264parse ! avdec_h264 ! decodebin ! videoconvert ! appsink', cv2.CAP_GSTREAMER)
-    cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false', cv2.CAP_GSTREAMER)
-
+    # cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false', cv2.CAP_GSTREAMER)
+    # cap = cv2.VideoCapture('udpsrc port=5000 caps="application/x-rtp,media=(string)video, encoding-name=(string)H264, payload=(int)96" ! rtpjitterbuffer latency=100 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink drop=true sync=false num-buffers=-1', cv2.CAP_GSTREAMER)
+    print(cap.getBackendName())
     
     print("cap is open: ", cap.isOpened())
     while True:
+        print("Reading cap")
         success, frame = cap.read()  # read the camera frame
         print("success: ", success)
+
+        # Print the frame width and height
+        print('Frame width:', cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        print('Frame height:', cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        # Check if the webcam is opened correctly
+
         if not success:
+            print("not success")
             break
         else:
             ret, buffer = cv2.imencode('.jpg', frame)
