@@ -55,7 +55,7 @@ deviceId = sys.argv[1]
 sio = NamespaceHandler()
 
 # Connect to the server
-sio.connect('http://localhost:5000')
+sio.connect('http://127.0.0.1:5000')
 
 # Register event handlers
 sio.on('connect', sio.on_connect)
@@ -77,7 +77,7 @@ def send_status_updates():
                 'temperature': get_temperature()
             }
             
-            response = requests.post('http://localhost:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            response = requests.post('http://127.0.0.1:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
             
             if response.status_code == 200:
                 print('Data sent successfully')
