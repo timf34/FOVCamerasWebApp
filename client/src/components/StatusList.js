@@ -1,5 +1,5 @@
 import React from 'react';
-import './StatusList.css';  
+import '../stylesheets/StatusList.css';  
 
 export default function StatusList({ status }) {
   if (!status.length) {
