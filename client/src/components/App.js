@@ -5,6 +5,8 @@ import useStatus from './useStatus';
 import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
+import MotorControlForm from './MotorControlForm';
+import '../stylesheets/styles.css'
 
 export default function App() {
   const [useFirebase, setUseFirebase] = useState(false);  // set to true to use firebase database listening, false to use websocket listening
@@ -20,9 +22,21 @@ export default function App() {
         <Login email={email} setEmail={setEmail} password={password} setPassword={setPassword} errorMessage={errorMessage} handleLogin={handleLogin} />
       ) : (
         <div>
-          <StatusList status={status} />
-          <CommandButton />
-          <ServerImage />
+          <div className="component-container">
+            <StatusList status={status} />
+          </div>
+
+          <div className="component-container">
+            <CommandButton />
+          </div>
+
+          <div className="component-container">
+            <ServerImage />
+          </div>
+
+          <div className="component-container">
+            <MotorControlForm />
+          </div>
         </div>
       )}
     </div>
