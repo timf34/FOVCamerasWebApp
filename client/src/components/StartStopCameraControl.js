@@ -1,43 +1,55 @@
 import React, { useState } from 'react';
-import { auth } from './firebase'; 
+import { auth } from './firebase';
 
-export default function StartCameraControlButton() {
-    const [deviceId, setDeviceId] = useState('jetson1'); 
-    const [startCamera, setStartCamera] = useState('start_camera_control');
+export default function CameraControlForm() {
+  const [deviceId, setDeviceId] = useState('jetson1');
+  const [action, setAction] = useState('start');
 
-    const startCameraControl = async () => {
-        if (!auth.currentUser) {
-            console.error('User not logged in');
-            return;
-        }
-        else {
-            console.log('User logged in:', auth.currentUser.email);
-        }
-        const token = await auth.currentUser.getIdToken();
+  const handleActionChange = (event) => {
+    setAction(event.target.value);
+  };
 
-        const response = await fetch('http://localhost:5000/api/start-camera', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ deviceId, startCamera })
-        });
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
 
-        if (!response.ok) {
-            console.error('Failed to send command:', response.statusText);
-            return;
-        }
+    if (!auth.currentUser) {
+      console.error('User not logged in');
+      return;
+    } else {
+      console.log('User logged in:', auth.currentUser.email);
+    }
 
-        const responseBody = await response.json();
-        console.log(responseBody.message);
-    };
+    const token = await auth.currentUser.getIdToken();
+    const apiUrl = action === 'start' ? 'http://localhost:5000/api/start-camera' : 'http://localhost:5000/api/stop-camera';
 
-    return (
-        <div>
-            <button onClick={startCameraControl}>
-                Start Camera Control
-            </button>
-        </div>
-    );
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ deviceId, action }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to send command:', response.statusText);
+      return;
+    }
+
+    const responseBody = await response.json();
+    console.log(responseBody.message);
+  };
+
+  return (
+    <form onSubmit={handleFormSubmit}>
+      <label>
+        Select action:
+        <select value={action} onChange={handleActionChange}>
+          <option value="start">Start Camera Control</option>
+          <option value="stop">Stop Camera Control</option>
+        </select>
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+  );
 }

@@ -162,6 +162,7 @@ def handle_start_camera_control():
         return jsonify({"message": "Device not connected"}), 400
 
 def handle_stop_camera_control():
+    print("Stop camera control")
     data = request.get_json()
     deviceId = data['deviceId']
     if deviceId in server.connections:
@@ -245,6 +246,7 @@ def register_routes() -> None:
     server.app.route('/api/image', methods=['GET'])(get_image)
     server.app.route('/api/image', methods=['POST'])(new_streaming_method)
     server.app.route('/api/start-camera', methods=['POST'])(handle_start_camera_control)
+    server.app.route('/api/stop-camera', methods=['POST'])(handle_stop_camera_control)
 
 
 if __name__ == '__main__':
