@@ -16,6 +16,7 @@ import requests
 import json
 import random
 import time
+import subprocess
 import threading
 from socketio import Client
 
@@ -32,6 +33,11 @@ def get_temperature():
     return random.randint(0, 100)
 
 class NamespaceHandler(Client):
+    def __init__(self):
+        super().__init__()
+        self.process = None
+        self.pid_file_path = './camera_control_pid.txt'
+        
     def on_connect(self):
         print('Connected to the server')
 
@@ -46,9 +52,20 @@ class NamespaceHandler(Client):
     
     def on_start_camera_control(self):
         print('Received start camera control command')
-    
+        # if process is not already running, start it
+        if self.process is None or self.process.poll() is not None:
+            self.process = subprocess.Popen(['python3', './learning/while_hello_world.py'])
+            with open(self.pid_file_path, 'w') as pid_file:
+                pid_file.write(str(self.process.pid))
+
     def on_stop_camera_control(self):
         print('Received stop camera control command')
+        # if process is running, stop it
+        if self.process is not None and self.process.poll() is None:
+            self.process.terminate()
+            self.process.wait()  # wait for process to terminate
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)  # remove pid file
 
 # Device ID as a command line argument
 import sys
