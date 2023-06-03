@@ -150,19 +150,7 @@ def post_command(user):
     else:
         print("Server connections2: ", server.connections)
         return jsonify({"message": "Device not connected"}), 400
-
-
-def register_routes() -> None:
-    server.socketio.on('device_id')(handle_device_id)
-    server.socketio.on('disconnect')(handle_disconnect)
-    server.app.route('/api/status', methods=['GET'])(get_status)
-    server.app.route('/api/status', methods=['POST'])(post_status)
-    server.app.route('/api/command', methods=['POST'])(post_command)
-    server.app.route('/api/video', methods=['GET'])(video)
-    server.app.route('/api/image', methods=['GET'])(get_image)
-    server.app.route('/api/image', methods=['POST'])(new_streaming_method)
-
-
+    
 
 def send_status_updates():
     while not server.stop_event.is_set():
@@ -216,6 +204,17 @@ def get_image():
         return 'No image available', 404
 
     return Response(image_data, mimetype='image/jpeg')
+
+
+def register_routes() -> None:
+    server.socketio.on('device_id')(handle_device_id)
+    server.socketio.on('disconnect')(handle_disconnect)
+    server.app.route('/api/status', methods=['GET'])(get_status)
+    server.app.route('/api/status', methods=['POST'])(post_status)
+    server.app.route('/api/command', methods=['POST'])(post_command)
+    server.app.route('/api/video', methods=['GET'])(video)
+    server.app.route('/api/image', methods=['GET'])(get_image)
+    server.app.route('/api/image', methods=['POST'])(new_streaming_method)
 
 
 if __name__ == '__main__':
