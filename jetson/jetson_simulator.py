@@ -58,10 +58,13 @@ if len(sys.argv) != 2:
 
 deviceId = sys.argv[1]
 
+with open('ip_address.txt', 'r') as file:
+    ip_address = file.read().strip()
+
 sio = NamespaceHandler()
 
-# Connect to the server
-sio.connect('http://127.0.0.1:5000')
+# Connect to the server using the IP address read from the file
+sio.connect(f'http://{ip_address}:5000')
 
 # Register event handlers
 sio.on('connect', sio.on_connect)
@@ -85,7 +88,7 @@ def send_status_updates():
                 'temperature': get_temperature()
             }
             
-            response = requests.post('http://127.0.0.1:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            response = requests.post(f'http://{ip_address}:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
             
             if response.status_code == 200:
                 print('Data sent successfully')
