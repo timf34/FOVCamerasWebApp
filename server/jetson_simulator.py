@@ -43,6 +43,12 @@ class NamespaceHandler(Client):
 
     def on_command(self, data):  # This function listens for the 'command' event
         print('Received command:', data)
+    
+    def on_start_camera_control(self):
+        print('Received start camera control command')
+    
+    def on_stop_camera_control(self):
+        print('Received stop camera control command')
 
 # Device ID as a command line argument
 import sys
@@ -62,6 +68,8 @@ sio.on('connect', sio.on_connect)
 sio.on('disconnect', sio.on_disconnect)
 sio.on('message', sio.on_message)
 sio.on('command', sio.on_command)  # Listen for 'command' event
+sio.on('start_camera_control', sio.on_start_camera_control)
+sio.on('stop_camera_control', sio.on_stop_camera_control)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)

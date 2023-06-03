@@ -6,6 +6,7 @@ import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
+import StartCameraControlButton from './StartStopCameraControl';
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -36,6 +37,10 @@ export default function App() {
 
           <div className="component-container">
             <MotorControlForm />
+          </div>
+
+          <div className="component-container">
+            <StartCameraControlButton />
           </div>
         </div>
       )}

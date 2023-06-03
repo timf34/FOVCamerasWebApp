@@ -150,6 +150,35 @@ def post_command(user):
     else:
         print("Server connections2: ", server.connections)
         return jsonify({"message": "Device not connected"}), 400
+
+def handle_start_camera_control():
+    print("Start camera control")
+    data = request.get_json()
+    deviceId = data['deviceId']
+    if deviceId in server.connections:
+        server.socketio.emit('start_camera_control', room=server.connections[deviceId])
+        return jsonify({"message": "Camera control start command sent"}), 200
+    else:
+        return jsonify({"message": "Device not connected"}), 400
+
+def handle_stop_camera_control():
+    data = request.get_json()
+    deviceId = data['deviceId']
+    if deviceId in server.connections:
+        server.socketio.emit('stop_camera_control', room=server.connections[deviceId])
+        return jsonify({"message": "Camera control stop command sent"}), 200
+    else:
+        return jsonify({"message": "Device not connected"}), 400
+
+def handle_zoom(data):
+    deviceId = data['deviceId']
+    zoom_value = data['zoom_value']  # Percentage to zoom in or out
+    if deviceId in server.connections:
+        server.socketio.emit('zoom', zoom_value, room=server.connections[deviceId])
+        return jsonify({"message": "Zoom command sent"}), 200
+    else:
+        return jsonify({"message": "Device not connected"}), 400
+
     
 
 def send_status_updates():
@@ -215,6 +244,7 @@ def register_routes() -> None:
     server.app.route('/api/video', methods=['GET'])(video)
     server.app.route('/api/image', methods=['GET'])(get_image)
     server.app.route('/api/image', methods=['POST'])(new_streaming_method)
+    server.app.route('/api/start-camera', methods=['POST'])(handle_start_camera_control)
 
 
 if __name__ == '__main__':
