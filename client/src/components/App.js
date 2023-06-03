@@ -6,7 +6,7 @@ import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
-import '../stylesheets/styles.css'
+import '../stylesheets/App.css'
 
 export default function App() {
   const [useFirebase, setUseFirebase] = useState(false);  // set to true to use firebase database listening, false to use websocket listening
