@@ -56,8 +56,20 @@ class NamespaceHandler(Client):
         # if process is not already running, start it
         if self.process is None or self.process.poll() is not None:
             self.process = subprocess.Popen(['python3', './learning/number_input_loop.py'], stdin=subprocess.PIPE)
+
+            # give the process a second to start up
+            time.sleep(1)
+
+            # check if the process is still running
+            if self.process.poll() is not None:
+                print('Failed to start process')
+                return
+            else:
+                print('Process started successfully')
+
             with open(self.pid_file_path, 'w') as pid_file:
                 pid_file.write(str(self.process.pid))
+
 
     def on_stop_camera_control(self):
         print('Received stop camera control command')
