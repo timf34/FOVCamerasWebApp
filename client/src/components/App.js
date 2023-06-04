@@ -7,6 +7,7 @@ import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
+import SendInputButton from './TempSendInputButton';
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -42,6 +43,11 @@ export default function App() {
           <div className="component-container">
             <StartCameraControlButton />
           </div>
+
+          <div className="component-container">
+            <SendInputButton />
+          </div>
+
         </div>
       )}
     </div>
