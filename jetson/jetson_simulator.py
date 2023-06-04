@@ -14,6 +14,7 @@ Run from multiple terminals as follows:
 
 import requests
 import json
+import os 
 import random
 import time
 import subprocess
