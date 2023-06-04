@@ -171,6 +171,19 @@ def handle_stop_camera_control():
     else:
         return jsonify({"message": "Device not connected"}), 400
 
+def handle_send_input():
+    print("Send input to script")
+    data = request.get_json()
+    deviceId = data['deviceId']
+    input_data = data['input']
+    if deviceId in server.connections:
+        server.socketio.emit('send_input', input_data, room=server.connections[deviceId])
+        return jsonify({"message": "Input sent"}), 200
+    else:
+        return jsonify({"message": "Device not connected"}), 400
+
+
+
 def handle_zoom(data):
     deviceId = data['deviceId']
     zoom_value = data['zoom_value']  # Percentage to zoom in or out
@@ -247,6 +260,8 @@ def register_routes() -> None:
     server.app.route('/api/image', methods=['POST'])(new_streaming_method)
     server.app.route('/api/start-camera', methods=['POST'])(handle_start_camera_control)
     server.app.route('/api/stop-camera', methods=['POST'])(handle_stop_camera_control)
+    server.app.route('/api/send-input', methods=['POST'])(handle_send_input)
+
 
 
 if __name__ == '__main__':

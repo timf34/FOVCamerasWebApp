@@ -55,7 +55,7 @@ class NamespaceHandler(Client):
         print('Received start camera control command')
         # if process is not already running, start it
         if self.process is None or self.process.poll() is not None:
-            self.process = subprocess.Popen(['python3', './learning/while_hello_world.py'])
+            self.process = subprocess.Popen(['python3', './learning/number_input_loop.py'], stdin=subprocess.PIPE)
             with open(self.pid_file_path, 'w') as pid_file:
                 pid_file.write(str(self.process.pid))
 
@@ -67,6 +67,15 @@ class NamespaceHandler(Client):
             self.process.wait()  # wait for process to terminate
             if os.path.exists(self.pid_file_path):
                 os.remove(self.pid_file_path)  # remove pid file
+    
+    def on_send_input(self, data):
+        print('Received input:', data)
+        # if process is running, send input to it
+        if self.process is not None and self.process.poll() is None:
+            input_data = data + '\n'  # Add a newline character at the end, because readline() reads until it encounters a newline
+            self.process.stdin.write(input_data.encode())  # stdin expects bytes, so encode the string as bytes
+            self.process.stdin.flush()  # flush the buffer to make sure the data is actually sent to the subprocess
+
 
 # Device ID as a command line argument
 import sys
@@ -91,6 +100,7 @@ sio.on('message', sio.on_message)
 sio.on('command', sio.on_command)  # Listen for 'command' event
 sio.on('start_camera_control', sio.on_start_camera_control)
 sio.on('stop_camera_control', sio.on_stop_camera_control)
+sio.on('send_input', sio.on_send_input)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)
