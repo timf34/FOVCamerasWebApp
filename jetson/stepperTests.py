@@ -1,7 +1,37 @@
-import Jetson.GPIO as GPIO
+# TODO: this file needs refactoring. At least add some typing. S
+
+import os
+import requests
 import sys
 import time
-import os
+
+# Simulation flag
+SIMULATION_MODE = True
+
+try:
+    import Jetson.GPIO as GPIO
+except ImportError:
+    if not SIMULATION_MODE:
+        raise
+
+# Function to simulate GPIO operations
+def simulated_gpio_method(*args, **kwargs):
+    # print(f"Simulated GPIO method called with args: {args} kwargs: {kwargs}")
+    pass # Do nothing
+
+# If we're in simulation mode, replace the GPIO methods with our simulated method
+if SIMULATION_MODE:
+    GPIO = type('GPIO', (object,), {
+        'setmode': simulated_gpio_method,
+        'setup': simulated_gpio_method,
+        'output': simulated_gpio_method,
+        'cleanup': simulated_gpio_method,
+        'BOARD': 'BOARD',
+        'OUT': 'OUT',
+        'HIGH': 'HIGH',
+        'LOW': 'LOW'
+    })
+
 
 # Pin Definitions
 # Define the GPIO pins for the stepper motors
@@ -35,6 +65,10 @@ if not os.path.exists(POSITIONS_FILE):
     with open(POSITIONS_FILE, "w") as file:
         file.write("0,0,0")
 
+# TODO: add error handling here!
+with open('ip_address.txt', 'r') as file:
+    ip_address = file.read().strip()
+
 # Setup GPIO
 def setup_gpio():
     GPIO.setmode(GPIO.BOARD)
@@ -53,21 +87,25 @@ def cleanup_gpio():
 # Function to rotate a motor
 def rotate_motor(step_pin, dir_pin, sleep_pin, steps, direction, speed):
     # Set the motor direction
-    GPIO.output(dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW)
+    GPIO.output(dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW, print_debug=False)
 
     # Activate sleep pin
-    GPIO.output(sleep_pin, GPIO.HIGH)
+    GPIO.output(sleep_pin, GPIO.HIGH, print_debug=False)
     time.sleep(0.1)  # Delay before motor movement
 
     # Rotate the motor
-    for _ in range(steps):
-        GPIO.output(step_pin, GPIO.HIGH)
-        time.sleep(1 / speed)
-        GPIO.output(step_pin, GPIO.LOW)
-        time.sleep(1 / speed)
+    if not SIMULATION_MODE:
+        for i in range(steps):
+            GPIO.output(step_pin, GPIO.HIGH, print_debug=False)
+            time.sleep(1 / speed)
+            GPIO.output(step_pin, GPIO.LOW, print_debug=False)
+            time.sleep(1 / speed)
+
+    print("End rotation") # Debug print
 
     # Deactivate sleep pin
-    GPIO.output(sleep_pin, GPIO.LOW)
+    GPIO.output(sleep_pin, GPIO.LOW, print_debug=False)
+
 
 # Function to move a motor
 def move_motor(step_pin, dir_pin, sleep_pin, position, conversion_factor, limit, speed):
@@ -94,6 +132,19 @@ def load_motor_positions():
 def save_motor_positions(f_position, i_position, z_position):
     with open(POSITIONS_FILE, "w") as file:
         file.write(f"{f_position},{i_position},{z_position}")
+
+    # Prepare data to be sent
+    data = {
+        "f_position": f_position,
+        "i_position": i_position,
+        "z_position": z_position
+    }
+
+    # Send a POST request to the server
+    response = requests.post(f"http://{ip_address}:5000/api/motor-positions", json=data)
+
+    # Print the server's response (for debugging purposes)
+    print(response.text)
 
 # Main program
 if __name__ == "__main__":
