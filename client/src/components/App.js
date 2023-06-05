@@ -7,6 +7,7 @@ import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
+import CameraStreamForm from './StartStopCameraStream';
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -37,6 +38,10 @@ export default function App() {
 
           <div className='component-container'>
             <h3><u>Camera Streaming</u></h3>
+          </div>
+
+          <div className="component-container">
+            <CameraStreamForm />
           </div>
 
           <div className="component-container">

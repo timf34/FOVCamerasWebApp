@@ -183,13 +183,23 @@ def handle_send_input():
         return jsonify({"message": "Device not connected"}), 400
 
 
-
-def handle_zoom(data):
+def handle_start_camera_stream():
+    print("Start camera stream")
+    data = request.get_json()
     deviceId = data['deviceId']
-    zoom_value = data['zoom_value']  # Percentage to zoom in or out
     if deviceId in server.connections:
-        server.socketio.emit('zoom', zoom_value, room=server.connections[deviceId])
-        return jsonify({"message": "Zoom command sent"}), 200
+        server.socketio.emit('start_camera_stream', room=server.connections[deviceId])
+        return jsonify({"message": "Camera stream start command sent"}), 200
+    else:
+        return jsonify({"message": "Device not connected"}), 400 
+    
+def handle_stop_camera_stream():
+    print("Stop camera stream")
+    data = request.get_json()
+    deviceId = data['deviceId']
+    if deviceId in server.connections:
+        server.socketio.emit('stop_camera_stream', room=server.connections[deviceId])
+        return jsonify({"message": "Camera stream stop command sent"}), 200
     else:
         return jsonify({"message": "Device not connected"}), 400
 
@@ -261,6 +271,8 @@ def register_routes() -> None:
     server.app.route('/api/start-camera', methods=['POST'])(handle_start_camera_control)
     server.app.route('/api/stop-camera', methods=['POST'])(handle_stop_camera_control)
     server.app.route('/api/send-input', methods=['POST'])(handle_send_input)
+    server.app.route('/api/start-camera-stream', methods=['POST'])(handle_start_camera_stream)
+    server.app.route('/api/stop-camera-stream', methods=['POST'])(handle_stop_camera_stream)
 
 
 
