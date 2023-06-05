@@ -42,9 +42,9 @@ export default function MotorControlForm() {
                 Axis:
                 <select value={axis} onChange={(e) => setAxis(e.target.value)}>
                     <option value="">--Select an axis--</option>
-                    <option value="f">F</option>
-                    <option value="i">I</option>
-                    <option value="z">Z</option>
+                    <option value="f,">F</option>
+                    <option value="i,">I</option>
+                    <option value="z,">Z</option>
                 </select>
             </label>
             <label>
