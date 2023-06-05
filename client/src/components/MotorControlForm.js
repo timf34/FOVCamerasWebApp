@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { auth } from './firebase'; 
 
 export default function MotorControlForm() {
+    const [deviceId, setDeviceId] = useState('jetson1'); 
     const [axis, setAxis] = useState('');
     const [percentage, setPercentage] = useState('');
 
@@ -18,13 +19,13 @@ export default function MotorControlForm() {
 
         console.log('Token:', token);
 
-        const response = await fetch('http://localhost:5000//api/send-input', {
+        const response = await fetch('http://localhost:5000/api/send-input', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ axis, percentage })
+            body: JSON.stringify({ deviceId, input: axis + percentage })
         });
 
         if (!response.ok) {
