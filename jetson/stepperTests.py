@@ -1,6 +1,7 @@
 import Jetson.GPIO as GPIO
 import sys 
 import time
+import os
 
 # Pin Definitions
 # Define the GPIO pins for the stepper motors
@@ -28,6 +29,11 @@ Z_SPEED = 3200
 
 # File name to store the motor positions
 POSITIONS_FILE = "motor_positions.txt"
+
+# Create the positions file if it doesn't exist
+if not os.path.exists(POSITIONS_FILE):
+    with open(POSITIONS_FILE, "w") as file:
+        file.write("0,0,0")
 
 # Setup GPIO
 GPIO.setmode(GPIO.BOARD)
