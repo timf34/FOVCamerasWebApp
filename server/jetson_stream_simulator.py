@@ -20,7 +20,7 @@ while True:
         print("Failed to encode frame.")
         break
 
-    cv2.imshow('Video Stream', frame)
+    # cv2.imshow('Video Stream', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):  # close on 'q' key press
         print("Received 'q' key press. Exiting...")
         break
