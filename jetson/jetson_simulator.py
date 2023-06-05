@@ -131,6 +131,7 @@ sio.on('start_camera_control', sio.on_start_camera_control)
 sio.on('stop_camera_control', sio.on_stop_camera_control)
 sio.on('send_input', sio.on_send_input)
 sio.on('start_camera_stream', sio.on_start_camera_stream)
+sio.on('stop_camera_stream', sio.on_stop_camera_stream)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)
