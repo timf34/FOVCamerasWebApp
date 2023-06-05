@@ -18,7 +18,7 @@ export default function MotorControlForm() {
 
         console.log('Token:', token);
 
-        const response = await fetch('http://localhost:5000/move_motor', {
+        const response = await fetch('http://localhost:5000//api/send-input', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

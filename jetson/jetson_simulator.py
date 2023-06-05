@@ -55,7 +55,7 @@ class NamespaceHandler(Client):
         print('Received start camera control command')
         # if process is not already running, start it
         if self.process is None or self.process.poll() is not None:
-            self.process = subprocess.Popen(['python3', './learning/number_input_loop.py'], stdin=subprocess.PIPE)
+            self.process = subprocess.Popen(['python3', './stepperTests.py'], stdin=subprocess.PIPE)
 
             # give the process a second to start up
             time.sleep(1)
