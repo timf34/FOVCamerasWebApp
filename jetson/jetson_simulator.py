@@ -20,6 +20,7 @@ import time
 import subprocess
 import threading
 from socketio import Client
+from typing import Dict
 
 def get_wifi_status():
     # randomly return True or False
@@ -36,7 +37,7 @@ def get_temperature():
 class NamespaceHandler(Client):
     def __init__(self):
         super().__init__()
-        self.process = None
+        self.process: Dict[str, subprocess.Popen] = {}  # key: command, value: subprocess.Popen object
         self.pid_file_path = './camera_control_pid.txt'
         
     def on_connect(self):
@@ -53,32 +54,26 @@ class NamespaceHandler(Client):
     
     def on_start_camera_control(self):
         print('Received start camera control command')
-        # if process is not already running, start it
-        if self.process is None or self.process.poll() is not None:
-            self.process = subprocess.Popen(['python3', './stepperTests.py'], stdin=subprocess.PIPE)
-
-            # give the process a second to start up
+        if "start_camera_control" not in self.process or self.process["start_camera_control"].poll() is not None:
+            self.process["start_camera_control"] = subprocess.Popen(['python3', './stepperTests.py'], stdin=subprocess.PIPE)
             time.sleep(1)
-
-            # check if the process is still running
-            if self.process.poll() is not None:
+            if self.process["start_camera_control"].poll() is not None:
                 print('Failed to start process')
                 return
             else:
                 print('Process started successfully')
-
             with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process.pid))
+                pid_file.write(str(self.process["start_camera_control"].pid))
 
 
     def on_stop_camera_control(self):
         print('Received stop camera control command')
-        # if process is running, stop it
-        if self.process is not None and self.process.poll() is None:
-            self.process.terminate()
-            self.process.wait()  # wait for process to terminate
+        if "start_camera_control" in self.process and self.process["start_camera_control"].poll() is None:
+            self.process["start_camera_control"].terminate()
+            self.process["start_camera_control"].wait()
             if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)  # remove pid file
+                os.remove(self.pid_file_path)
+
     
     def on_send_input(self, data):
         print('Received input:', data)
@@ -87,6 +82,28 @@ class NamespaceHandler(Client):
             input_data = data + '\n'  # Add a newline character at the end, because readline() reads until it encounters a newline
             self.process.stdin.write(input_data.encode())  # stdin expects bytes, so encode the string as bytes
             self.process.stdin.flush()  # flush the buffer to make sure the data is actually sent to the subprocess
+
+    def on_start_camera_stream(self):
+        print('Received start camera stream command')
+        if "start_camera_stream" not in self.process or self.process["start_camera_stream"].poll() is not None:
+            self.process["start_camera_stream"] = subprocess.Popen(['python3', './stepperTests.py'], stdin=subprocess.PIPE)
+            time.sleep(1)
+            if self.process["start_camera_stream"].poll() is not None:
+                print('Failed to start process')
+                return
+            else:
+                print('Process started successfully')
+            with open(self.pid_file_path, 'w') as pid_file:
+                pid_file.write(str(self.process["start_camera_stream"].pid))
+
+    def on_stop_camera_stream(self):
+        print('Received stop camera stream command')
+        if "start_camera_stream" in self.process and self.process["start_camera_stream"].poll() is None:
+            self.process["start_camera_stream"].terminate()
+            self.process["start_camera_stream"].wait()
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)
+  
 
 
 # Device ID as a command line argument
@@ -113,6 +130,7 @@ sio.on('command', sio.on_command)  # Listen for 'command' event
 sio.on('start_camera_control', sio.on_start_camera_control)
 sio.on('stop_camera_control', sio.on_stop_camera_control)
 sio.on('send_input', sio.on_send_input)
+sio.on('start_camera_stream', sio.on_start_camera_stream)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)
