@@ -115,20 +115,23 @@ if __name__ == "__main__":
         # Terminal input for motor coordinate and axis
         motor_input = sys.stdin.readline().strip()
 
-        # if motor_input == "q":
-        # Save motor positions before quitting
-        save_motor_positions(f_position, i_position, z_position)
-        # break
+        if motor_input == "q":
+            # Save motor positions before quitting
+            save_motor_positions(f_position, i_position, z_position)
+            break
 
         axis, target_coord = motor_input.split(',')
         target_position = int(target_coord)
 
         if axis == "f":
             f_position = move_motor(F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN, f_position, target_position, 9354 * 4, F_SPEED)
+            save_motor_positions(f_position, i_position, z_position)
         elif axis == "i":
             i_position = move_motor(I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN, i_position, target_position, 75 * 4, I_SPEED)
+            save_motor_positions(f_position, i_position, z_position)
         elif axis == "z":
             z_position = move_motor(Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN, z_position, target_position, 4073 * 4, Z_SPEED)
+            save_motor_positions(f_position, i_position, z_position)
         else:
             print("Invalid motor axis. Please try again.")
 
