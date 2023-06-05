@@ -91,7 +91,7 @@ def load_motor_positions():
     return [0, 0, 0]
 
 # Function to save the motor positions to a file
-def save_motor_positions():
+def save_motor_positions(f_position, i_position, z_position):
     with open(POSITIONS_FILE, "w") as file:
         file.write(f"{f_position},{i_position},{z_position}")
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
         # if motor_input == "q":
         # Save motor positions before quitting
-        save_motor_positions()
+        save_motor_positions(f_position, i_position, z_position)
         # break
 
         axis, target_coord = motor_input.split(',')
