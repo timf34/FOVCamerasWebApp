@@ -78,7 +78,7 @@ class NamespaceHandler(Client):
     def on_send_input(self, data):
         print('Received input:', data)
         # if process is running, send input to it
-        if self.process is not None and self.process.poll() is None:
+        if self.process is not None and self.process["start_camera_control"].poll() is None:
             input_data = data + '\n'  # Add a newline character at the end, because readline() reads until it encounters a newline
             self.process.stdin.write(input_data.encode())  # stdin expects bytes, so encode the string as bytes
             self.process.stdin.flush()  # flush the buffer to make sure the data is actually sent to the subprocess
