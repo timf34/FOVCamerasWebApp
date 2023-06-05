@@ -24,6 +24,10 @@ export default function App() {
         <Login email={email} setEmail={setEmail} password={password} setPassword={setPassword} errorMessage={errorMessage} handleLogin={handleLogin} />
       ) : (
         <div>
+          <div className='component-container'>
+            <h3><u>Device Diagnostics</u></h3>
+          </div>
+
           <div className="component-container">
             <StatusList status={status} />
           </div>
@@ -32,12 +36,16 @@ export default function App() {
             <CommandButton />
           </div>
 
+          <div className='component-container'>
+            <h3><u>Camera Streaming</u></h3>
+          </div>
+
           <div className="component-container">
             <ServerImage />
           </div>
 
-          <div className="component-container">
-            <MotorControlForm />
+          <div className='component-container'>
+            <h3><u>Motor Control</u></h3>
           </div>
 
           <div className="component-container">
@@ -45,9 +53,8 @@ export default function App() {
           </div>
 
           <div className="component-container">
-            <SendInputButton />
+            <MotorControlForm />
           </div>
-
         </div>
       )}
     </div>
