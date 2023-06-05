@@ -91,17 +91,16 @@ def load_motor_positions():
     return [0, 0, 0]
 
 # Function to save the motor positions to a file
-def save_motor_positions(positions):
+def save_motor_positions():
     with open(POSITIONS_FILE, "w") as file:
-        file.write(",".join(str(pos) for pos in positions))
+        file.write(f"{f_position},{i_position},{z_position}")
 
 # Main program
 if __name__ == "__main__":
     setup_gpio()
 
     # Load motor positions from the file
-    positions = load_motor_positions()
-    f_position, i_position, z_position = positions
+    f_position, i_position, z_position = load_motor_positions()
 
     while True:
         print("F Motor Position:", f_position)
@@ -116,10 +115,10 @@ if __name__ == "__main__":
         # Terminal input for motor coordinate and axis
         motor_input = sys.stdin.readline().strip()
 
-        if motor_input == "q":
-            # Save motor positions before quitting
-            save_motor_positions(positions)
-            break
+        # if motor_input == "q":
+        # Save motor positions before quitting
+        save_motor_positions()
+        # break
 
         axis, target_coord = motor_input.split(',')
         target_position = int(target_coord)
