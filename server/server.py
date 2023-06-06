@@ -260,7 +260,8 @@ def get_image():
 
     return Response(image_data, mimetype='image/jpeg')
 
-last_received_motor_positions = None
+# Initialize the dictionary
+last_received_motor_positions = {}
 
 def get_motor_positions():
     global last_received_motor_positions
@@ -270,19 +271,19 @@ def get_motor_positions():
             raise ValueError("Invalid request data")
         deviceId = data['deviceId']
         print("Motor positions: \n", data)
-        last_received_motor_positions = data  # save this data
+        last_received_motor_positions[deviceId] = data  # save data for this device
         return jsonify(data), 200
     except Exception as e:
         print(f"Error in get_motor_positions: {e}")
         return jsonify({"status": "failure", "message": str(e)}), 400
 
-def send_motor_positions():
+def send_motor_positions(device_id):
     global last_received_motor_positions
-    print("Last received motor positions: ", last_received_motor_positions)
-    if last_received_motor_positions:
-        return jsonify(last_received_motor_positions), 200
+    if device_id in last_received_motor_positions:
+        return jsonify(last_received_motor_positions[device_id]), 200
     else:
-        return jsonify({"status": "failure", "message": "No motor positions received yet"}), 400
+        return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
+
 
 
 def register_routes() -> None:
@@ -300,7 +301,7 @@ def register_routes() -> None:
     server.app.route('/api/start-camera-stream', methods=['POST'])(handle_start_camera_stream)
     server.app.route('/api/stop-camera-stream', methods=['POST'])(handle_stop_camera_stream)
     server.app.route('/api/motor-positions', methods=['POST'])(get_motor_positions)
-    server.app.route('/api/get-motor-positions', methods=['GET'])(send_motor_positions)
+    server.app.route('/api/get-motor-positions/<device_id>', methods=['GET'])(send_motor_positions)
 
 
 
