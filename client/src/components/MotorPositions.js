@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import '../stylesheets/MotorPositions.css'
 
 class MotorPositions extends Component {
     constructor(props) {
@@ -31,11 +32,11 @@ class MotorPositions extends Component {
 
     render() {
         const { response, selectedDevice } = this.state;
-
+    
         return (
-            <div>
+            <div className="container">
                 <h5>Motor Positions</h5>
-                <div>
+                <div className="select">
                     <label>Select device: </label>
                     <select value={selectedDevice} onChange={this.handleDeviceChange}>
                         <option value="jetson1">jetson1</option>
@@ -44,11 +45,16 @@ class MotorPositions extends Component {
                         <option value="jetson4">jetson4</option>
                     </select>
                 </div>
-                <pre>{JSON.stringify(response, null, 2)}</pre>
-                <button onClick={this.fetchMotorPositions}>Refresh</button>
+                <div className="pre">
+                    {Object.entries(response).map(([key, value], i) => (
+                        <p key={i}><b>{key}:</b> {value}</p>
+                    ))}
+                </div>
+                <button className="button" onClick={this.fetchMotorPositions}>Refresh</button>
             </div>
         );
     }
+    
 }
 
 export default MotorPositions;
