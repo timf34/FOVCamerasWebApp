@@ -104,6 +104,7 @@ def handle_disconnect():
             break
 
 
+# Note: this seems to not be used
 @authenticate
 def get_status(user):
     return jsonify(server.status)
@@ -126,6 +127,7 @@ def video():
 
 
 def post_status():
+    print("Received status dawg")
     data = request.get_json()
     deviceId = data['deviceId']
     server.status[deviceId] = {
@@ -258,6 +260,30 @@ def get_image():
 
     return Response(image_data, mimetype='image/jpeg')
 
+last_received_motor_positions = None
+
+def get_motor_positions():
+    global last_received_motor_positions
+    try:
+        data = request.get_json()
+        if not data or 'deviceId' not in data:
+            raise ValueError("Invalid request data")
+        deviceId = data['deviceId']
+        print("Motor positions: \n", data)
+        last_received_motor_positions = data  # save this data
+        return jsonify(data), 200
+    except Exception as e:
+        print(f"Error in get_motor_positions: {e}")
+        return jsonify({"status": "failure", "message": str(e)}), 400
+
+def send_motor_positions():
+    global last_received_motor_positions
+    print("Last received motor positions: ", last_received_motor_positions)
+    if last_received_motor_positions:
+        return jsonify(last_received_motor_positions), 200
+    else:
+        return jsonify({"status": "failure", "message": "No motor positions received yet"}), 400
+
 
 def register_routes() -> None:
     server.socketio.on('device_id')(handle_device_id)
@@ -273,6 +299,8 @@ def register_routes() -> None:
     server.app.route('/api/send-input', methods=['POST'])(handle_send_input)
     server.app.route('/api/start-camera-stream', methods=['POST'])(handle_start_camera_stream)
     server.app.route('/api/stop-camera-stream', methods=['POST'])(handle_stop_camera_stream)
+    server.app.route('/api/motor-positions', methods=['POST'])(get_motor_positions)
+    server.app.route('/api/get-motor-positions', methods=['GET'])(send_motor_positions)
 
 
 

@@ -8,6 +8,7 @@ import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
+import MotorPositions from './MotorPositions';
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -58,6 +59,10 @@ export default function App() {
 
           <div className="component-container">
             <MotorControlForm />
+          </div>
+
+          <div className='component-container'>
+          <MotorPositions />
           </div>
         </div>
       )}

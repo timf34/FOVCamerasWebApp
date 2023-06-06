@@ -130,21 +130,31 @@ def load_motor_positions():
 
 # Function to save the motor positions to a file
 def save_motor_positions(f_position, i_position, z_position):
-    with open(POSITIONS_FILE, "w") as file:
-        file.write(f"{f_position},{i_position},{z_position}")
+    try:
+        with open(POSITIONS_FILE, "w") as file:
+            file.write(f"{f_position},{i_position},{z_position}")
 
-    # Prepare data to be sent
-    data = {
-        "f_position": f_position,
-        "i_position": i_position,
-        "z_position": z_position
-    }
+        # Prepare data to be sent
+        data = {
+            "deviceId": "jetson1",
+            "f_position": f_position,
+            "i_position": i_position,
+            "z_position": z_position
+        }
 
-    # Send a POST request to the server
-    response = requests.post(f"http://{ip_address}:5000/api/motor-positions", json=data)
+        # Send a POST request to the server
+        response = requests.post(f"http://{ip_address}:5000/api/motor-positions", json=data)
 
-    # Print the server's response (for debugging purposes)
-    print(response.text)
+        # Print the server's response (for debugging purposes)
+        print(response.text)
+
+        # Check the server's response
+        if response.status_code != 200:
+            raise ValueError(f"Error from server: {response.text}")
+
+    except Exception as e:
+        print(f"Error in save_motor_positions: {e}")
+
 
 # Main program
 if __name__ == "__main__":
