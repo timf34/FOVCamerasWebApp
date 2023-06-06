@@ -34,3 +34,4 @@ yarn-error.log*
 server/keys/fov-cameras-web-app-firebase-adminsdk-az1vf-edba3117ae.json
 server/keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json
 jetson/ip_address,txt
+jetson/motor_positions.txt
