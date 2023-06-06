@@ -16,7 +16,7 @@ class MotorPositions extends Component {
 
     fetchMotorPositions = () => {
         const { selectedDevice } = this.state;
-        fetch(`http://localhost:5000/api/get-motor-positions/${selectedDevice}`)
+        fetch(`${process.env.REACT_APP_API_URL}/api/get-motor-positions/${selectedDevice}`)
             .then(response => response.json())
             .then(data => {
                 this.setState({ response: data });
