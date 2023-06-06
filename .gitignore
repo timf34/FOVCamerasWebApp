@@ -5,7 +5,7 @@
 /client/node_modules
 /client/build
 /server/node_modules
-/server/env
+/server/venv
 
 # Keys and configs
 /keys
