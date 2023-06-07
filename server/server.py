@@ -56,7 +56,7 @@ class StreamManager:
 
 class Server:
 
-    def __init__(self, enable_socketio: bool=True, enable_db_uploading: bool=False):
+    def __init__(self, enable_socketio: bool=True, enable_db_uploading: bool=False, developing_react_locally: bool = False):
         with open('firebase_config.json') as f:
             self.firebase_config = json.load(f)
 
@@ -69,8 +69,15 @@ class Server:
         self.auth = auth
         self.db = db
         self.connections = {}
-        self.app = Flask(__name__)
-        CORS(self.app)
+        self.developing_react_locally: bool = developing_react_locally
+        if self.developing_react_locally:
+            self.app = Flask(__name__)
+            CORS(self.app)
+        else:
+            self.app = Flask(__name__,
+                        static_folder='../client/build/static',
+                        template_folder='../client/build')
+            CORS(self.app, resources={r'/*': {'origins': '*'}})
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         self.status = {}
         print("Before threading")
@@ -284,6 +291,9 @@ def send_motor_positions(device_id):
     else:
         return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
 
+def serve():
+    return send_from_directory('../client/build', 'index.html')
+
 
 
 def register_routes() -> None:
@@ -302,6 +312,7 @@ def register_routes() -> None:
     server.app.route('/api/stop-camera-stream', methods=['POST'])(handle_stop_camera_stream)
     server.app.route('/api/motor-positions', methods=['POST'])(get_motor_positions)
     server.app.route('/api/get-motor-positions/<device_id>', methods=['GET'])(send_motor_positions)
+    server.app.route('/', methods=['GET'])(serve)
 
 
 
