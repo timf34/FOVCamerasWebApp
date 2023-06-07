@@ -70,14 +70,14 @@ class Server:
         self.db = db
         self.connections = {}
         self.developing_react_locally: bool = developing_react_locally
-        if self.developing_react_locally:
-            self.app = Flask(__name__)
-            CORS(self.app)
-        else:
-            self.app = Flask(__name__,
-                        static_folder='../client/build/static',
-                        template_folder='../client/build')
-            CORS(self.app, resources={r'/*': {'origins': '*'}})
+        # if self.developing_react_locally:
+        #     self.app = Flask(__name__)
+        #     CORS(self.app)
+        # else:
+        self.app = Flask(__name__,
+                    static_folder='../client/build/static',
+                    template_folder='../client/build')
+        CORS(self.app, resources={r'/*': {'origins': '*'}})
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         self.status = {}
         print("Before threading")
@@ -315,3 +315,9 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         signal_handler(signal.SIGINT, None)
+else:
+    # Creating a server instance for WSGI servers
+    server = Server(enable_socketio=True)
+    app = server.app  # This line makes the app instance available to the WSGI server
+    register_routes()
+
