@@ -117,22 +117,6 @@ def get_status(user):
     return jsonify(server.status)
 
 
-def video():
-    print("Sending video")
-    # Define the directory and file path
-    directory = './data/'
-    file_path = 'sample_vid.mp4'
-    
-    # Check if ./data/sample_vid.mp4 exists
-    if os.path.isfile(os.path.join(directory, file_path)):
-        # If it does, send it
-        return send_from_directory(directory=directory, path=file_path, as_attachment=True, mimetype='video/mp4')
-    else:
-        # If it doesn't, handle the situation (log an error, raise an exception, return a default file, etc.)
-        print("File not found.")
-        return None
-
-
 def post_status():
     print("Received status dawg")
     data = request.get_json()
@@ -302,7 +286,6 @@ def register_routes() -> None:
     server.app.route('/api/status', methods=['GET'])(get_status)
     server.app.route('/api/status', methods=['POST'])(post_status)
     server.app.route('/api/command', methods=['POST'])(post_command)
-    server.app.route('/api/video', methods=['GET'])(video)
     server.app.route('/api/image', methods=['GET'])(get_image)
     server.app.route('/api/image', methods=['POST'])(new_streaming_method)
     server.app.route('/api/start-camera', methods=['POST'])(handle_start_camera_control)
