@@ -75,8 +75,8 @@ class Server:
         #     CORS(self.app)
         # else:
         self.app = Flask(__name__,
-                    static_folder='../client/build/static',
-                    template_folder='../client/build')
+                    static_folder='./build/static',
+                    template_folder='./build')
         CORS(self.app, resources={r'/*': {'origins': '*'}})
         self.socketio = SocketIO(self.app, cors_allowed_origins="*")
         self.status = {}
@@ -276,7 +276,7 @@ def send_motor_positions(device_id):
         return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
 
 def serve():
-    return send_from_directory('../client/build', 'index.html')
+    return send_from_directory('build', 'index.html')
 
 
 
@@ -317,7 +317,7 @@ if __name__ == '__main__':
         signal_handler(signal.SIGINT, None)
 else:
     # Creating a server instance for WSGI servers
+    print("Yes we are here dawg")
     server = Server(enable_socketio=True)
-    app = server.app  # This line makes the app instance available to the WSGI server
+    application = server.app  # This line makes the app instance available to the WSGI server
     register_routes()
-
