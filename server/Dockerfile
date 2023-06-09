@@ -19,6 +19,9 @@ RUN ldconfig
 # Set work directory to /app
 WORKDIR /app
 
+# We can't mount on EB, so we need to copy the files
+COPY . /app
+
 # Install the requirements
 RUN pip3 install Flask flask-cors flask-socketio firebase-admin opencv-python
 

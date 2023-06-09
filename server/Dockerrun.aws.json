@@ -1,0 +1,13 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Ports": [
+        {
+            "ContainerPort": "5000"
+        }
+    ],
+    "Image": {
+        "Name": "FOVWebAppDockerV1",
+        "Update": "true"
+    },
+    "Logging": "/var/log/nginx"
+}
