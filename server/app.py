@@ -1,21 +1,15 @@
-# TODO: add better linting to VSCode for
-
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
-
 import threading    
 import json
 import logging
-
-import cv2
+import signal
 import numpy as np
-
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import firebase_admin
 from firebase_admin import auth, db
-
 from stream_manager import StreamManager
 
 
@@ -51,9 +45,6 @@ def authenticate(f):
 class Server:
     """Server"""
     def __init__(self, enable_socketio: bool=True, enable_db_uploading: bool=False, developing_react_locally: bool = False):
-        with open('firebase_config.json') as f:
-            self.firebase_config = json.load(f)
-        cred = firebase_admin.credentials.Certificate("./keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
         self.auth = auth
         self.db = db
         self.connections = {}
@@ -65,11 +56,20 @@ class Server:
         self.enable_socketio = enable_socketio
         self.enable_db_uploading = enable_db_uploading
         self.stream_manager = StreamManager()
+        self.load_firebase_config()
 
+    def load_firebase_config(self):
+        with open('firebase_config.json') as f:
+            self.firebase_config = json.load(f)
+        cred = firebase_admin.credentials.Certificate("./keys/fov-cameras-web-app-firebase-adminsdk-az1vf-8396208820.json")
+
+
+server = Server()
 
 @socketio.on('device_id')
 def handle_device_id(device_id):
     print(f"Device {device_id} has connected.")  # For debugging
+    app.logger.info(f"Device {device_id} has connected.")  # For debugging
     server.connections[device_id] = request.sid
 
 @socketio.on('disconnect')
@@ -79,6 +79,12 @@ def handle_disconnect():
             del server.connections[device_id]
             print(f"Device {device_id} has disconnected.")  # For debugging
             break
+
+
+@authenticate
+@app.route('/api/status', methods=['GET'])
+def get_status():
+    return jsonify(server.status)
 
 @app.route('/api/status', methods=['POST'])
 def post_status():
@@ -91,6 +97,7 @@ def post_status():
     }
 
     print(f"Received data: {server.status[deviceId]}")  # For debugging
+    app.logger.info(f"Received data: {server.status[deviceId]}")
     return jsonify({"message": "Data received"}), 200
 
 @app.route('/api/command', methods=['POST'])
@@ -100,6 +107,7 @@ def post_command(user):
     deviceId = data['deviceId']
     command = data['command']
     print(f"Received command: {command} and deviceID: {deviceId}")  # For debugging
+    app.logger.info(f"Received command: {command} and deviceID: {deviceId}")  # For debugging
     if deviceId in server.connections:
         print("Server connections1: ", server.connections)
         socketio.emit('command', command, room=server.connections[deviceId])
@@ -133,7 +141,7 @@ def handle_stop_camera_control():
 @app.route('/api/send-input', methods=['POST'])
 def handle_send_input():
     print("Send input to script")
-    data = request.get_json()
+    data = request.get_json()   
     deviceId = data['deviceId']
     input_data = data['input']
     if deviceId in server.connections:
@@ -210,6 +218,36 @@ def send_motor_positions(device_id):
         return jsonify(last_received_motor_positions[device_id]), 200
     else:
         return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
+    
+
+def send_status_updates():
+    while not server.stop_event.is_set():
+        items = list(server.status.items())
+        for deviceId, device in items:
+            if server.stop_event.is_set():
+                print("Stop event set, breaking loop.")  # For debugging
+                break
+            last_seen = datetime.fromisoformat(device['last_seen'])
+            if datetime.now() - last_seen > timedelta(seconds=10):
+                print(f"Device {deviceId} is disconnected.")  # For debugging
+                device['status']['wifiStatus'] = False
+                if server.enable_socketio:
+                    socketio.emit('status', {deviceId: device['status']})
+            else:
+                if server.enable_socketio:
+                    print(f"Sending status update for device {deviceId}.")  # For debugging
+                    socketio.emit('status', {deviceId: device['status']})
+            if server.enable_db_uploading:
+                # Push the status update to Firebase
+                print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
+                # server.db.reference('statuses').child(deviceId).set(device)  # Note: commenting out to speed up dev. Code is getting stuck initializing db
+
+            socketio.sleep(5)  # Sleep for 2 seconds
+
+def signal_handler():
+    print('Stopping the server...')
+    server.stop_event.set()
+    exit(0)  # Exit the program
 
 @app.route('/', methods=['GET'])
 def serve():
@@ -217,8 +255,11 @@ def serve():
 
 
 if __name__ == '__main__':
-    server = Server()
-    print("Before run")
-    socketio.run(app, host='0.0.0.0', port=5003)
-    print("after run")
-
+    signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
+    try:
+        print("Before run")
+        socketio.run(app, host='0.0.0.0', port=5005)
+        print("after run")
+    except KeyboardInterrupt:
+        print("Keyboard interrupt")
+        signal_handler(signal.SIGINT, None)
