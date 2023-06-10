@@ -16,7 +16,6 @@ from functools import wraps
 
 os.environ['GST_DEBUG'] = '3'
 
-
 # A decorator to authenticate requests
 def authenticate(f):
     @wraps(f)
@@ -280,7 +279,7 @@ def serve():
 
 
 
-def register_routes() -> None:
+def register_routes(server) -> None:
     server.socketio.on('device_id')(handle_device_id)
     server.socketio.on('disconnect')(handle_disconnect)
     server.app.route('/api/status', methods=['GET'])(get_status)
@@ -299,25 +298,27 @@ def register_routes() -> None:
 
 
 
+# server = Server(enable_socketio=True)
+# register_routes(server)   
+# server.socketio.start_background_task(send_status_updates)
+# socketioapplication = server.socketio
+
+
 if __name__ == '__main__':
-    print("Starting server...")
+    print("If clause")
     server = Server(enable_socketio=True)
+    application = server.app
     print("Server started.")
-    register_routes()
+    register_routes(server)   
     print("Routes registered.")
     server.socketio.start_background_task(send_status_updates)
     print("Status updates task started.")
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
     try:
         print("Before run")
+        # server.socketio.run(server.app, host='0.0.0.0', port=5000)
         server.socketio.run(server.app, host='0.0.0.0', port=5000)
         print("After run")
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         signal_handler(signal.SIGINT, None)
-else:
-    # Creating a server instance for WSGI servers
-    print("Yes we are here dawg")
-    server = Server(enable_socketio=True)
-    application = server.app  # This line makes the app instance available to the WSGI server
-    register_routes()
