@@ -37,6 +37,8 @@ The server will run on [http://localhost:3000](http://localhost:3000). -->
 
 For Python server:
 
+**Note that you need to run this through the venv! Otherwise the server doesn't work and gets stuck in the backgroun tasks func**
+
 1. Navigate into the `server` directory from the terminal:
     ```bash
     cd server
