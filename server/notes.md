@@ -23,3 +23,6 @@ gst-launch-1.0 -v udpsrc port=5001 ! application/x-rtp,encoding-name=H264,payloa
 `docker run -it --name opencv_container opencv-gstreamer:latest bash`
 
 `docker run -it -v ${PWD}:/app -p 5000:5000 opencv-gstreamer:latest bash`
+
+
+`docker run -p 5004:5004 opencv-gstreamer:latest`
