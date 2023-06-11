@@ -3,6 +3,8 @@ from functools import wraps
 import threading    
 import json
 import logging
+# import gevent
+# from gevent import monkey
 import signal
 import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
@@ -11,6 +13,8 @@ from flask_socketio import SocketIO
 import firebase_admin
 from firebase_admin import auth, db
 from stream_manager import StreamManager
+
+# monkey.patch_all()
 
 
 app = Flask(__name__,
@@ -223,28 +227,34 @@ def send_motor_positions(device_id):
 def send_status_updates():
     while not server.stop_event.is_set():
         items = list(server.status.items())
+        # print("server.stop_event: ", server.stop_event)
+        # print(items)
         for deviceId, device in items:
             if server.stop_event.is_set():
                 print("Stop event set, breaking loop.")  # For debugging
+                app.logger.info("Stop event set, breaking loop.")  # For debugging
                 break
             last_seen = datetime.fromisoformat(device['last_seen'])
             if datetime.now() - last_seen > timedelta(seconds=10):
                 print(f"Device {deviceId} is disconnected.")  # For debugging
+                app.logger.info(f"Device {deviceId} is disconnected.")  # For debugging
                 device['status']['wifiStatus'] = False
                 if server.enable_socketio:
                     socketio.emit('status', {deviceId: device['status']})
             else:
                 if server.enable_socketio:
                     print(f"Sending status update for device {deviceId}.")  # For debugging
+                    app.logger.info(f"Sending status update for device {deviceId}.")  # For debugging
                     socketio.emit('status', {deviceId: device['status']})
             if server.enable_db_uploading:
                 # Push the status update to Firebase
                 print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
+                app.logger.info(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
                 # server.db.reference('statuses').child(deviceId).set(device)  # Note: commenting out to speed up dev. Code is getting stuck initializing db
 
             socketio.sleep(5)  # Sleep for 2 seconds
 
-def signal_handler():
+def signal_handler(signal, frame):
     print('Stopping the server...')
     server.stop_event.set()
     exit(0)  # Exit the program
@@ -255,10 +265,14 @@ def serve():
 
 
 if __name__ == '__main__':
+    print("Berore send status updates")
+    socketio.start_background_task(send_status_updates)
+    # gevent.spawn(send_status_updates)
+    print("After send status updates")
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
     try:
         print("Before run")
-        socketio.run(app, host='0.0.0.0', port=5005)
+        socketio.run(app, host='0.0.0.0', port=5000)
         print("after run")
     except KeyboardInterrupt:
         print("Keyboard interrupt")
