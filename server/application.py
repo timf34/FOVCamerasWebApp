@@ -3,8 +3,6 @@ from functools import wraps
 import threading    
 import json
 import logging
-# import gevent
-# from gevent import monkey
 import signal
 import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
