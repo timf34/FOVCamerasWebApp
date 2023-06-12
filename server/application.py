@@ -239,19 +239,20 @@ def create_app():
 
     return app
 
-        
+
 def signal_handler(signal, frame):
     print('Stopping the server...')
     exit(0)  # Exit the program
 
 
-app = create_app()
+application = create_app()  
 
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
     try:
         print("About to run socketio.run")
-        socketio.run(app, host='0.0.0.0', port=5000)
+        # socketio.run(application, host='0.0.0.0', port=5000)
+        socketio.run(application)
     except KeyboardInterrupt:
         signal_handler(signal.SIGINT, None)
