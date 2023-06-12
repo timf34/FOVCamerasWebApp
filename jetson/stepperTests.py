@@ -87,24 +87,24 @@ def cleanup_gpio():
 # Function to rotate a motor
 def rotate_motor(step_pin, dir_pin, sleep_pin, steps, direction, speed):
     # Set the motor direction
-    GPIO.output(dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW, print_debug=False)
+    GPIO.output(dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW)
 
     # Activate sleep pin
-    GPIO.output(sleep_pin, GPIO.HIGH, print_debug=False)
+    GPIO.output(sleep_pin, GPIO.HIGH)
     time.sleep(0.1)  # Delay before motor movement
 
     # Rotate the motor
     if not SIMULATION_MODE:
         for i in range(steps):
-            GPIO.output(step_pin, GPIO.HIGH, print_debug=False)
+            GPIO.output(step_pin, GPIO.HIGH)
             time.sleep(1 / speed)
-            GPIO.output(step_pin, GPIO.LOW, print_debug=False)
+            GPIO.output(step_pin, GPIO.LOW)
             time.sleep(1 / speed)
 
     print("End rotation") # Debug print
 
     # Deactivate sleep pin
-    GPIO.output(sleep_pin, GPIO.LOW, print_debug=False)
+    GPIO.output(sleep_pin, GPIO.LOW)
 
 
 # Function to move a motor
