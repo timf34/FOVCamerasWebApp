@@ -39,3 +39,4 @@ jetson/motor_positions.txt
 jetson/jetson_simulator.py
 
 *.pyc
+*.env
