@@ -233,7 +233,7 @@ def create_app():
                     app.logger.info(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
                     # server.db.reference('statuses').child(deviceId).set(device)  # Note: commenting out to speed up dev. Code is getting stuck initializing db
 
-            socketio.sleep(10)  # Sleep for 2 seconds
+            socketio.sleep(5)  # Sleep for 2 seconds
 
     socketio.start_background_task(send_status_updates)
 
