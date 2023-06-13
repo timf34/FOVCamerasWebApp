@@ -121,3 +121,69 @@ npm start
 Also note to be sure to run `server.py` before running `jetson_simulator.py [device_id]` to 
 ensure that there is a server there for the device to connect to (and so its ID is properly 
 added to the list of connections).
+```
+fov-cameras-web-app
+├─ .gitignore
+├─ .vscode
+│  └─ settings.json
+├─ client
+│  ├─ .env
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ public
+│  │  ├─ favicon.ico
+│  │  ├─ index.html
+│  │  ├─ logo192.png
+│  │  ├─ logo512.png
+│  │  ├─ manifest.json
+│  │  └─ robots.txt
+│  ├─ README.md
+│  └─ src
+│     ├─ components
+│     │  ├─ App.js
+│     │  ├─ firebase.js
+│     │  ├─ Login.js
+│     │  ├─ MotorControlForm.js
+│     │  ├─ MotorPositions.js
+│     │  ├─ ServerImage.js
+│     │  ├─ StartStopCameraControl.js
+│     │  ├─ StartStopCameraStream.js
+│     │  ├─ StatusList.js
+│     │  ├─ useAuth.js
+│     │  ├─ useSendCommand.js
+│     │  └─ useStatus.js
+│     ├─ index.js
+│     └─ stylesheets
+│        ├─ App.css
+│        ├─ MotorPositions.css
+│        └─ StatusList.css
+├─ flowcharts
+│  └─ flowchart.drawio
+├─ jetson
+│  ├─ camera_control_pid.txt
+│  ├─ ip_address.txt
+│  ├─ jetson_stream_simulator.py
+│  ├─ learning
+│  │  ├─ hello_world.py
+│  │  ├─ number_input_loop.py
+│  │  └─ while_hello_world.py
+│  ├─ nano_requirements.txt
+│  └─ stepperTests.py
+├─ README.md
+└─ server
+   ├─ .dockerignore
+   ├─ .ebextensions
+   │  └─ python.config
+   ├─ .gitignore
+   ├─ app.zip
+   ├─ application.py
+   ├─ application_old.py
+   ├─ Dockerfile
+   ├─ notes.md
+   ├─ Procfile
+   ├─ requirements.txt
+   ├─ server.py
+   ├─ stream_manager.py
+   └─ __pycache__
+
+```
