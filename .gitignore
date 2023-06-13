@@ -40,3 +40,5 @@ jetson/jetson_simulator.py
 
 *.pyc
 *.env
+
+.idea
