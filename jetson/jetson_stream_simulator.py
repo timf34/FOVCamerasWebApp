@@ -2,6 +2,11 @@ import cv2
 import os 
 import requests 
 
+from utils import load_env
+
+
+load_env()
+URL = os.environ.get('URL')
 
 # Check the operating system
 if os.name == 'nt':
@@ -37,7 +42,7 @@ while True:
 
 
     # Send the JPEG image to the server
-    response = requests.post('http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com/api/image', data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
+    response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
     
     if response.status_code != 200:
         print("Failed to send frame.")

@@ -22,6 +22,10 @@ import threading
 from socketio import Client
 from typing import Dict
 
+from utils import laod_env
+
+URL = load_env()
+
 def get_wifi_status():
     # randomly return True or False
     return True
@@ -121,8 +125,7 @@ with open('ip_address.txt', 'r') as file:
 sio = NamespaceHandler()
 
 # Connect to the server using the IP address read from the file
-# sio.connect(f'http://{ip_address}:5000')
-sio.connect('http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com/')
+sio.connect(f'{URL}')
 
 # Register event handlers
 sio.on('connect', sio.on_connect)
