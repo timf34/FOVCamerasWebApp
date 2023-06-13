@@ -22,7 +22,7 @@ import threading
 from socketio import Client
 from typing import Dict
 
-from utils import laod_env
+from utils import load_env
 
 URL = load_env()
 
