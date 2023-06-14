@@ -25,7 +25,8 @@ from typing import Dict
 from utils import load_env
 
 
-URL = load_env()
+load_env()
+URL = os.environ.get('REACT_APP_URL')
 
 
 def get_wifi_status() -> bool:
