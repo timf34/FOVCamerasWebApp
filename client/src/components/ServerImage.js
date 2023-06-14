@@ -15,18 +15,18 @@ const ServerImage = () => {
 
   const fetchImage = async () => {
     try {
-      console.log("REACT_APP_API_URL: " + process.env.REACT_APP_API_URL);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/image`);
+      console.log("REACT_APP_URL: " + process.env.REACT_APP_URL);
+      const response = await fetch(`${process.env.REACT_APP_URL}/api/image`);
       if (!response.ok) {
         throw new Error(response.statusText);
       }
 
       const blob = await response.blob();
-      const newImageSrc = REACT_APP_API_URL.createObjectURL(blob);
+      const newImageSrc = URL.createObjectURL(blob);
       newImage.current.src = newImageSrc;
 
       newImage.current.onload = () => {
-        REACT_APP_API_URL.revokeObjectURL(imageSrc);  // Clean up the old image REACT_APP_API_URL
+        URL.revokeObjectURL(imageSrc);  // Clean up the old image URL
         setImageSrc(newImageSrc);
         setError(null);
       };

@@ -6,7 +6,7 @@ from utils import load_env
 
 
 load_env()
-URL = os.environ.get('REACT_APP_API_URL')
+URL = os.environ.get('REACT_APP_URL')
 
 # Check the operating system
 if os.name == 'nt':

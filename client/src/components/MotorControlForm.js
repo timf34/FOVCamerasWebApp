@@ -19,7 +19,7 @@ export default function MotorControlForm() {
 
         console.log('Token:', token);
 
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-input`, {
+        const response = await fetch(`${process.env.REACT_APP_URL}/api/send-input`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

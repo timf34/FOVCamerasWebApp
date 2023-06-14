@@ -20,7 +20,7 @@ export default function CameraControlForm() {
     }
 
     const token = await auth.currentUser.getIdToken();
-    const apiUrl = action === 'start' ? `${process.env.REACT_APP_API_URL}/api/start-camera` : `${process.env.REACT_APP_API_URL}/api/stop-camera`;
+    const apiUrl = action === 'start' ? `${process.env.REACT_APP_URL}/api/start-camera` : `${process.env.REACT_APP_URL}/api/stop-camera`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
