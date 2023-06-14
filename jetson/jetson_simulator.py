@@ -160,8 +160,7 @@ def send_status_updates() -> None:
                 'temperature': get_temperature()
             }
             
-            # response = requests.post(f'http://{ip_address}:5000/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
-            response = requests.post('http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            response = requests.post(f'{URL}/api/status', data=json.dumps(data), headers={'Content-Type': 'application/json'})
             
             if response.status_code == 200:
                 print('Data sent successfully')
