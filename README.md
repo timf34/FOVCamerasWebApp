@@ -121,6 +121,13 @@ npm start
 Also note to be sure to run `server.py` before running `jetson_simulator.py [device_id]` to 
 ensure that there is a server there for the device to connect to (and so its ID is properly 
 added to the list of connections).
+
+
+**Note:**
+
+I have created a symbolic link between the root .env file and the .env files in the different sub folders 
+so I only have to change one file. (used this command: `mklink .env ..\.env`)
+
 ```
 fov-cameras-web-app
 ├─ .gitignore
