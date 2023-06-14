@@ -15,7 +15,7 @@ const ServerImage = () => {
 
   const fetchImage = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/image`);
+      const response = await fetch(`${process.env.URL}/api/image`);
       if (!response.ok) {
         throw new Error(response.statusText);
       }

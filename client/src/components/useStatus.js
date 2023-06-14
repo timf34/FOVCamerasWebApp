@@ -29,7 +29,7 @@ export default function useStatus(useFirebase) {
         off(statusesRef, 'value', listener);
       };
     } else {
-      const socket = io(`${process.env.REACT_APP_API_URL}`);
+      const socket = io(`${process.env.URL}`);
 
       socket.on('connect', () => {
         console.log('connected to websocket dawg');
