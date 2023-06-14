@@ -20,7 +20,7 @@ export default function CameraStreamForm() {
     }
 
     const token = await auth.currentUser.getIdToken();
-    const apiUrl = action === 'start-stream' ? `${process.env.URL}/api/start-camera-stream` : `${process.env.URL}/api/stop-camera-stream`;
+    const apiUrl = action === 'start-stream' ? `${process.env.REACT_APP_API_URL}/api/start-camera-stream` : `${process.env.REACT_APP_API_URL}/api/stop-camera-stream`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
