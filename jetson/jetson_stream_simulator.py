@@ -1,7 +1,6 @@
 import cv2
 import os 
-import requests 
-
+import socketio
 from utils import load_env
 
 
@@ -17,20 +16,25 @@ else:
         f'nvvidconv ! video/x-raw, width={str(640)}, height={str(640)}, format=BGRx ! '
         f'videoconvert ! video/x-raw, format=BGR ! appsink'
     )
+sio = socketio.Client()
 
+@sio.event
+def connect():
+    print("Connected to the server.")
+
+@sio.event
+def disconnect():
+    print("Disconnected from the server.")
+
+sio.connect(URL)  # replace with the URL of your server
 
 while True:
-    # Read a frame from the camera
-    print("Reading frame...")
     ret, frame = cap.read()
-    
     if not ret:
         print("Failed to read frame.")
         break
 
-    # Encode the frame as JPEG
     ret, jpeg = cv2.imencode('.jpg', frame)
-    
     if not ret:
         print("Failed to encode frame.")
         break
@@ -40,11 +44,6 @@ while True:
         print("Received 'q' key press. Exiting...")
         break
 
+    sio.emit('frame', {'image': jpeg.tobytes()})
 
-    # Send the JPEG image to the server
-    response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
-    
-    if response.status_code != 200:
-        print("Failed to send frame.")
-        print("Response code: ", response.status_code)
-        break
+sio.disconnect()
