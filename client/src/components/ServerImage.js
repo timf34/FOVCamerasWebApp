@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 const ServerImage = () => {
   const [imageSrc, setImageSrc] = useState(null);
@@ -40,7 +41,13 @@ const ServerImage = () => {
     return <div>Error loading image: {error}</div>;
   }
 
-  return imageSrc ? <img src={imageSrc} alt="From server" /> : <div>Loading...</div>;
+  return (
+    <TransformWrapper>
+      <TransformComponent>
+        {imageSrc ? <img src={imageSrc} alt="From server" /> : <div>Loading...</div>}
+      </TransformComponent>
+    </TransformWrapper>
+  );
 };
 
 export default ServerImage;
