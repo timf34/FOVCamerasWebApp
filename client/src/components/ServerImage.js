@@ -8,7 +8,7 @@ const ServerImage = () => {
 
   useEffect(() => {
     fetchImage();
-    const interval = setInterval(fetchImage, 1000);  // Fetch a new image every second
+    const interval = setInterval(fetchImage, 200);  // Fetch a new image every 1/3 second
 
     // Clean up the interval on unmount
     return () => clearInterval(interval);
