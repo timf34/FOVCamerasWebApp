@@ -16,6 +16,8 @@ from server import Server
 
 socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet', cors_allowed_origins="*")
 
+last_received_motor_positions = {}
+
 
 def authenticate(f):
     """A decorator to authenticate requests"""

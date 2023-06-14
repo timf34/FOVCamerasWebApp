@@ -5,6 +5,12 @@ import requests
 import sys
 import time
 
+from utils import load_env
+
+
+load_env()
+URL = os.environ.get('REACT_APP_URL')
+
 # Simulation flag
 SIMULATION_MODE = True
 
@@ -143,8 +149,7 @@ def save_motor_positions(f_position, i_position, z_position):
         }
 
         # Send a POST request to the server
-        # response = requests.post(f"http://{ip_address}:5000/api/motor-positions", json=data)  
-        response = requests.post(f"http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com/api/motor-positions", json=data)
+        response = requests.post(f"{URL}/api/motor-positions", json=data)
         # Print the server's response (for debugging purposes)
         print(response.text)
 
@@ -162,6 +167,9 @@ if __name__ == "__main__":
 
     # Load motor positions from the file
     f_position, i_position, z_position = load_motor_positions()
+
+    # Save motor positions on setup (this is so we can retrieve on web app without needing to change values)
+    save_motor_positions(f_position, i_position, z_position)
 
     while True:
         print("F Motor Position:", f_position)
