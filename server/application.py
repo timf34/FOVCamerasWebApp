@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from functools import wraps
+import cv2
 import threading    
 import json
 import logging
@@ -250,7 +251,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
     try:
         print("About to run socketio.run")
-        # socketio.run(application, host='0.0.0.0', port=5000)
-        socketio.run(application)
+        socketio.run(application, host='0.0.0.0', port=5000)
+        # socketio.run(application)
     except KeyboardInterrupt:
         signal_handler(signal.SIGINT, None)

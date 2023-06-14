@@ -42,7 +42,7 @@ while True:
 
 
     # Send the JPEG image to the server
-    response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
+    response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
     
     if response.status_code != 200:
         print("Failed to send frame.")
