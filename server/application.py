@@ -200,11 +200,21 @@ def create_app():
             return jsonify(last_received_motor_positions[device_id]), 200
         else:
             return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
+        
+    @socketio.on('frame')
+    def handle_frame(data):
+        image_data = data['image']
+        nparr = np.fromstring(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        _, img_encoded = cv2.imencode('.jpg', img)
+        image_data = img_encoded.tobytes()
+
+        server.stream_manager.update_image(image_data)
 
     @app.route('/', methods=['GET'])
     def serve():
         return send_from_directory('build', 'index.html')
-        
 
     def send_status_updates():
         while True:
