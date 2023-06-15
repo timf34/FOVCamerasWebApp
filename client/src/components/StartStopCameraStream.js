@@ -3,7 +3,7 @@ import { auth } from './firebase';
 
 export default function CameraStreamForm() {
   const [deviceId, setDeviceId] = useState('jetson1');
-  const [action, setAction] = useState('start');
+  const [action, setAction] = useState('start-stream');
 
   const handleActionChange = (event) => {
     setAction(event.target.value);
