@@ -9,6 +9,7 @@ import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
+import RecordVideoForm from './StartStopRecordVideoScript';
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -62,8 +63,17 @@ export default function App() {
           </div>
 
           <div className='component-container'>
-          <MotorPositions />
+            <MotorPositions />
           </div>
+
+          <div className='component-container'>
+            <h3><u>Record Video Script</u></h3>
+          </div>
+
+          <div className='component-container'>
+            <RecordVideoForm />
+          </div>
+
         </div>
       )}
     </div>

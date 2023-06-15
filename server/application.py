@@ -120,6 +120,28 @@ def create_app():
         else:
             return jsonify({"message": "Device not connected"}), 400
 
+    @app.route('/api/start-record', methods=['POST'])
+    def start_record_video_script():
+        print("Start record video script")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('start_record_video_script', room=server.connections[deviceId])
+            return jsonify({"message": "Record video start command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
+    @app.route('/api/stop-record', methods=['POST'])
+    def stop_record_video_script():
+        print("Stop record video script")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('stop_record_video_script', room=server.connections[deviceId])
+            return jsonify({"message": "Record video stop command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
     @app.route('/api/send-input', methods=['POST'])
     def handle_send_input():
         print("Send input to script")
