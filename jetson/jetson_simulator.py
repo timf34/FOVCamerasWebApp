@@ -69,7 +69,7 @@ class NamespaceHandler(Client):
     def on_start_camera_control(self) -> None:
         print('Received start camera control command')
         if "start_camera_control" not in self.process or self.process["start_camera_control"].poll() is not None:
-            self.process["start_camera_control"] = subprocess.Popen(['python3', './stepperTests.py'], stdin=subprocess.PIPE)
+            self.process["start_camera_control"] = subprocess.Popen(['python3', './camera_stepper_motors_control.py'], stdin=subprocess.PIPE)
             time.sleep(1)
             if self.process["start_camera_control"].poll() is not None:
                 print('Failed to start process')
@@ -98,7 +98,7 @@ class NamespaceHandler(Client):
     def on_start_camera_stream(self) -> None:
         print('Received start camera stream command')
         if "start_camera_stream" not in self.process or self.process["start_camera_stream"].poll() is not None:
-            self.process["start_camera_stream"] = subprocess.Popen(['python3', './jetson_stream_simulator.py'], stdin=subprocess.PIPE)
+            self.process["start_camera_stream"] = subprocess.Popen(['python3', './live_camera_stream.py'], stdin=subprocess.PIPE)
             time.sleep(1)
             if self.process["start_camera_stream"].poll() is not None:
                 print('Failed to start process')
