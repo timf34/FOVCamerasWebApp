@@ -22,7 +22,7 @@ import threading
 from socketio import Client
 from typing import Dict
 
-from utils import load_env
+from utils.utility_funcs import load_env
 
 
 load_env()
@@ -87,6 +87,28 @@ class NamespaceHandler(Client):
             if os.path.exists(self.pid_file_path):
                 os.remove(self.pid_file_path)
 
+    def on_start_record_video(self) -> None:
+        print('Received start record_video command')
+        if "start_record_video" not in self.process or self.process["start_record_video"].poll() is not None:
+            self.process["start_record_video"] = subprocess.Popen(['python3', './record_video.py'], stdin=subprocess.PIPE)
+            time.sleep(1)
+            if self.process["start_record_video"].poll() is not None:
+                print('Failed to start process')
+                return
+            else:
+                print('Process started successfully')
+            with open(self.pid_file_path, 'w') as pid_file:
+                pid_file.write(str(self.process["start_record_video"].pid))
+
+    def on_stop_record_video(self) -> None:
+        print('Received stop record_video command')
+        if "start_record_video" in self.process and self.process["start_record_video"].poll() is None:
+            self.process["start_record_video"].terminate()
+            self.process["start_record_video"].wait()
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)
+                print("Removed pid file for record_video")
+
     def on_send_input(self, data) -> None:
         print('Received input:', data)
         # if process is running, send input to it
@@ -144,6 +166,8 @@ sio.on('stop_camera_control', sio.on_stop_camera_control)
 sio.on('send_input', sio.on_send_input)
 sio.on('start_camera_stream', sio.on_start_camera_stream)
 sio.on('stop_camera_stream', sio.on_stop_camera_stream)
+sio.on('start_record_video_script', sio.on_start_record_video)
+sio.on('stop_record_video_script', sio.on_stop_record_video)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)

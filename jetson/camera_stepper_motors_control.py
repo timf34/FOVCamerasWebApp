@@ -5,7 +5,7 @@ import requests
 import sys
 import time
 
-from utils import load_env
+from utils.utility_funcs import load_env
 
 
 load_env()

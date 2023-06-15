@@ -1,7 +1,7 @@
 import cv2
 import os 
 import socketio
-from utils import load_env
+from utils.utility_funcs import load_env
 
 
 load_env()

@@ -49,3 +49,11 @@ def check_and_create_dir(dir_name: str) -> None:
         print(f"Directory {dir_name} already exists")
 
 
+def load_env() -> None:
+    """Load environment variables from .env file."""
+    with open(".env", "r") as f:
+        for line in f:
+            if line.strip():
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+                print(f"Loaded environment variable -> key: {key}, value: {value}")
