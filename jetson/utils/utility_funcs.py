@@ -51,7 +51,7 @@ def check_and_create_dir(dir_name: str) -> None:
 
 def load_env() -> None:
     """Load environment variables from .env file."""
-    with open(".env", "r") as f:
+    with open("../.env", "r") as f:
         for line in f:
             if line.strip():
                 key, value = line.strip().split('=', 1)
