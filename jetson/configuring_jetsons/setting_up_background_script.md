@@ -56,6 +56,7 @@ And start the service:
 
 ```
 sudo systemctl start web_app_listener.service
+```
 
 And check its status with:
 
