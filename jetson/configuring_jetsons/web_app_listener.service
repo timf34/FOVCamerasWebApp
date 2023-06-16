@@ -1,0 +1,14 @@
+[Unit]
+Description=Python Script jetson_simulator
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/tim/Desktop/FOVCamerasWebApp/jetson/jetson_simulator.py jetson
+WorkingDirectory=/home/tim/Desktop/FOVCamerasWebApp
+Restart=always
+User=tim
+Environment="PATH=/usr/bin:/bin:/usr/sbin:/sbin"
+EnvironmentFile=/home/tim/Desktop/FOVCamerasWebApp/jetson/.env
+
+[Install]
+WantedBy=multi-user.target
