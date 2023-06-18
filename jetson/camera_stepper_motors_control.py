@@ -10,7 +10,7 @@ load_env()
 URL = os.environ.get('REACT_APP_URL')
 
 # Simulation flag
-SIMULATION_MODE = False
+SIMULATION_MODE = True
 
 try:
     import Jetson.GPIO as GPIO
