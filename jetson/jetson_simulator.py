@@ -147,9 +147,9 @@ if len(sys.argv) != 2:
 
 deviceId = sys.argv[1]
 
-# TODO: add error handling here!
-with open('ip_address.txt', 'r') as file:
-    ip_address = file.read().strip()
+# # TODO: add error handling here!
+# with open('ip_address.txt', 'r') as file:
+#     ip_address = file.read().strip()
 
 sio = NamespaceHandler()
 
