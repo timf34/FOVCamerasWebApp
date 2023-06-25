@@ -1,18 +1,14 @@
 from datetime import datetime, timedelta
 from functools import wraps
 import cv2
-import threading    
-import json
 import logging
 import signal
 import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import firebase_admin
 from firebase_admin import auth, db
 from server import Server
-
 
 socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet', cors_allowed_origins="*")
 
@@ -21,6 +17,7 @@ last_received_motor_positions = {}
 
 def authenticate(f):
     """A decorator to authenticate requests"""
+
     @wraps(f)
     def decorated_function(*args, **kws):
         id_token = None
@@ -35,6 +32,7 @@ def authenticate(f):
         except Exception as e:
             print(f"Error: {e}")
             return jsonify({"message": "Invalid token"}), 401
+
     return decorated_function
 
 
@@ -46,7 +44,6 @@ def create_app():
     socketio.init_app(app)
 
     server = Server()
-
 
     @socketio.on('device_id')
     def handle_device_id(device_id):
@@ -61,7 +58,6 @@ def create_app():
                 del server.connections[device_id]
                 print(f"Device {device_id} has disconnected.")  # For debugging
                 break
-
 
     @authenticate
     @app.route('/api/status', methods=['GET'])
@@ -120,32 +116,10 @@ def create_app():
         else:
             return jsonify({"message": "Device not connected"}), 400
 
-    @app.route('/api/start-record', methods=['POST'])
-    def start_record_video_script():
-        print("Start record video script")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_record_video_script', room=server.connections[deviceId])
-            return jsonify({"message": "Record video start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
-    @app.route('/api/stop-record', methods=['POST'])
-    def stop_record_video_script():
-        print("Stop record video script")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_record_video_script', room=server.connections[deviceId])
-            return jsonify({"message": "Record video stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
     @app.route('/api/send-input', methods=['POST'])
     def handle_send_input():
         print("Send input to script")
-        data = request.get_json()   
+        data = request.get_json()
         deviceId = data['deviceId']
         input_data = data['input']
         if deviceId in server.connections:
@@ -163,7 +137,7 @@ def create_app():
             socketio.emit('start_camera_stream', room=server.connections[deviceId])
             return jsonify({"message": "Camera stream start command sent"}), 200
         else:
-            return jsonify({"message": "Device not connected"}), 400 
+            return jsonify({"message": "Device not connected"}), 400
 
     @app.route('/api/stop-camera-stream', methods=['POST'])
     def handle_stop_camera_stream():
@@ -221,8 +195,9 @@ def create_app():
         if device_id in last_received_motor_positions:
             return jsonify(last_received_motor_positions[device_id]), 200
         else:
-            return jsonify({"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
-        
+            return jsonify(
+                {"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
+
     @socketio.on('frame')
     def handle_frame(data):
         image_data = data['image']
@@ -278,8 +253,7 @@ def signal_handler(signal, frame):
     exit(0)  # Exit the program
 
 
-application = create_app()  
-
+application = create_app()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)  # Register the signal handler
