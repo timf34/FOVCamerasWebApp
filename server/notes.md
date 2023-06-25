@@ -25,4 +25,18 @@ gst-launch-1.0 -v udpsrc port=5001 ! application/x-rtp,encoding-name=H264,payloa
 `docker run -it -v ${PWD}:/app -p 5000:5000 opencv-gstreamer:latest bash`
 
 
-`docker run -p 5004:5004 opencv-gstreamer:latest`
+`docker run -p 5000:5000 opencv-gstreamer:latest`
+
+
+**Notes for using Docker**
+
+1. Build Docker image
+    - `docker build -t opencv-gstreamer:latest .`
+1. Run Docker image
+    - `docker run -p 5000:5000 opencv-gstreamer:latest`
+      - Note that this command assumes that you are running the server on port 5000. It also assumes you have a `CMD` in 
+        your Dockerfile that runs the server.
+
+We will now have the server running, we will still need to set up the client in a separate terminal running `npm start`. 
+
+
