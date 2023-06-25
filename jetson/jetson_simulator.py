@@ -18,6 +18,7 @@ import os
 import random
 import time
 import subprocess
+import sys
 import threading
 from socketio import Client
 from typing import Dict
@@ -140,20 +141,16 @@ class NamespaceHandler(Client):
   
 
 # Device ID as a command line argument
-import sys
 if len(sys.argv) != 2:
     print('Usage: python script.py <device_id>')
     sys.exit(1)
 
 deviceId = sys.argv[1]
 
-# # TODO: add error handling here!
-# with open('ip_address.txt', 'r') as file:
-#     ip_address = file.read().strip()
-
 sio = NamespaceHandler()
 
 # Connect to the server using the IP address read from the file
+print(f"Socketio connecting to {URL}...")
 sio.connect(f'{URL}')
 
 # Register event handlers
@@ -207,3 +204,5 @@ try:
     sio.wait()
 finally:
     sio.disconnect()
+
+
