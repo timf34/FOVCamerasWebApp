@@ -11,7 +11,7 @@ load_env()
 URL = os.environ.get('REACT_APP_URL')
 
 # Simulation flag
-SIMULATION_MODE = True
+SIMULATION_MODE = False
 
 try:
     import Jetson.GPIO as GPIO
@@ -124,7 +124,7 @@ class ServerRequest:
     @staticmethod
     def post(data):
         try:
-            response = requests.post(f"{URL}/api/motor-positions", json=data, timeout=5)
+            response = requests.post(f"{URL}/api/motor-positions", json=data, timeout=2)
             # Check the server's response
             if response.status_code != 200:
                 raise ValueError(f"Error from server: {response.text}")
