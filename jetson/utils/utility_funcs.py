@@ -51,9 +51,12 @@ def check_and_create_dir(dir_name: str) -> None:
 
 def load_env() -> None:
     """Load environment variables from .env file."""
-    with open("../.env", "r") as f:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(script_dir, ".env")
+    with open(env_path, "r") as f:
         for line in f:
             if line.strip():
                 key, value = line.strip().split('=', 1)
                 os.environ[key] = value
                 print(f"Loaded environment variable -> key: {key}, value: {value}")
+
