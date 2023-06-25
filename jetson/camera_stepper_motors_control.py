@@ -166,14 +166,18 @@ def save_motor_positions(f_position, i_position, z_position):
 
 # Main program
 if __name__ == "__main__":
+    print("Setting up GPIO...")
     setup_gpio()
 
+    print("loading motor pos")
     # Load motor positions from the file
     f_position, i_position, z_position = load_motor_positions()
 
+    print("saving motor pos")
     # Save motor positions on setup (this is so we can retrieve on web app without needing to change values)
     save_motor_positions(f_position, i_position, z_position)
 
+    print("while loop")
     while True:
         print("F Motor Position:", f_position)
         print("I Motor Position:", i_position)
