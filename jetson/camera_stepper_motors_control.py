@@ -81,10 +81,15 @@ class Motor:
         # Rotate the motor
         if not SIMULATION_MODE:
             for i in range(steps):
+                # Calculate acceleration
+                acceleration_factor = min(i, 10)  # We only increment speed for the first 10 steps
+                effective_speed = self.speed * (acceleration_factor / 10)
+
+                # Move motor
                 GPIO.output(self.step_pin, GPIO.HIGH)
-                time.sleep(1 / self.speed)
+                time.sleep(1 / effective_speed)
                 GPIO.output(self.step_pin, GPIO.LOW)
-                time.sleep(1 / self.speed)
+                time.sleep(1 / effective_speed)
 
         # Deactivate sleep pin
         GPIO.output(self.sleep_pin, GPIO.LOW)
