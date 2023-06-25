@@ -6,7 +6,7 @@ from requests.exceptions import Timeout
 
 from utils.utility_funcs import load_env
 
-
+# Load environment variables
 load_env()
 URL = os.environ.get('REACT_APP_URL')
 
@@ -20,28 +20,7 @@ except ImportError:
         raise
 
 
-# Function to simulate GPIO operations
-def simulated_gpio_method(*args, **kwargs):
-    # print(f"Simulated GPIO method called with args: {args} kwargs: {kwargs}")
-    pass # Do nothing
-
-
-# If we're in simulation mode, replace the GPIO methods with our simulated method
-if SIMULATION_MODE:
-    GPIO = type('GPIO', (object,), {
-        'setmode': simulated_gpio_method,
-        'setup': simulated_gpio_method,
-        'output': simulated_gpio_method,
-        'cleanup': simulated_gpio_method,
-        'BOARD': 'BOARD',
-        'OUT': 'OUT',
-        'HIGH': 'HIGH',
-        'LOW': 'LOW'
-    })
-
-
 # Pin Definitions
-# Define the GPIO pins for the stepper motors
 F_STEP_PIN = 15
 F_DIR_PIN = 12
 F_SLEEP_PIN = 7
@@ -61,135 +40,163 @@ F_SPEED = 800
 I_SPEED = 90
 Z_SPEED = 800
 
-# File name to store the motor positions
-POSITIONS_FILE = "motor_positions.txt"
-
-# Create the positions file if it doesn't exist
-if not os.path.exists(POSITIONS_FILE):
-    with open(POSITIONS_FILE, "w") as file:
-        file.write("0,0,0")
-
-# TODO: add error handling here!
-with open('ip_address.txt', 'r') as file:
-    ip_address = file.read().strip()
+# Function to simulate GPIO operations
+def simulated_gpio_method(*args, **kwargs):
+    # print(f"Simulated GPIO method called with args: {args} kwargs: {kwargs}")
+    pass  # Do nothing
 
 
-# Setup GPIO
-def setup_gpio():
-    GPIO.setmode(GPIO.BOARD)
-    pins = [F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN,
-            I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN,
-            Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN]
-    GPIO.setup(pins, GPIO.OUT)
-    GPIO.setup(SHDN, GPIO.OUT)
-
-    # Pull sleep pins LOW at the start
-    GPIO.output(pins[2::3], GPIO.LOW)
-    GPIO.output(SHDN, GPIO.LOW)
-
-
-# Cleanup GPIO
-def cleanup_gpio():
-    GPIO.cleanup()
+# If we're in simulation mode, replace the GPIO methods with our simulated method
+if SIMULATION_MODE:
+    GPIO = type('GPIO', (object,), {
+        'setmode': simulated_gpio_method,
+        'setup': simulated_gpio_method,
+        'output': simulated_gpio_method,
+        'cleanup': simulated_gpio_method,
+        'BOARD': 'BOARD',
+        'OUT': 'OUT',
+        'HIGH': 'HIGH',
+        'LOW': 'LOW'
+    })
 
 
-# Function to rotate a motor
-def rotate_motor(step_pin, dir_pin, sleep_pin, steps, direction, speed):
-    # Set the motor direction
-    GPIO.output(dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW)
+class Motor:
+    def __init__(self, step_pin: int, dir_pin: int, sleep_pin: int, speed: int, shdn: int):
+        self.step_pin = step_pin
+        self.dir_pin = dir_pin
+        self.sleep_pin = sleep_pin
+        self.speed = speed
+        self.osition = 0
+        self.shdn = shdn
 
-    # Activate sleep pin
-    GPIO.output(SHDN, GPIO.HIGH)
-    GPIO.output(sleep_pin, GPIO.HIGH)
-    time.sleep(0.1)  # Delay before motor movement
+    def rotate(self, steps, direction):
+        # Set the motor direction
+        GPIO.output(self.dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW)
 
-    # Rotate the motor
-    if not SIMULATION_MODE:
-        for i in range(steps):
-            GPIO.output(step_pin, GPIO.HIGH)
-            time.sleep(1 / speed)
-            GPIO.output(step_pin, GPIO.LOW)
-            time.sleep(1 / speed)
+        # Activate sleep pin
+        GPIO.output(self.sleep_pin, GPIO.HIGH)
+        GPIO.output(self.shdn, GPIO.HIGH)
+        time.sleep(0.1)  # Delay before motor movement
 
-    print("End rotation") # Debug print
+        # Rotate the motor
+        if not SIMULATION_MODE:
+            for i in range(steps):
+                GPIO.output(self.step_pin, GPIO.HIGH)
+                time.sleep(1 / self.speed)
+                GPIO.output(self.step_pin, GPIO.LOW)
+                time.sleep(1 / self.speed)
 
-    # Deactivate sleep pin
-    GPIO.output(sleep_pin, GPIO.LOW)
-    GPIO.output(SHDN, GPIO.LOW)
+        # Deactivate sleep pin
+        GPIO.output(self.sleep_pin, GPIO.LOW)
+        GPIO.output(self.shdn, GPIO.LOW)
 
-
-# Function to move a motor
-def move_motor(step_pin, dir_pin, sleep_pin, position, conversion_factor, speed) -> int:
-    steps = int(conversion_factor - position)
-    direction = "counter-clockwise" if steps > 0 else "clockwise"
-    rotate_motor(step_pin, dir_pin, sleep_pin, abs(steps), direction, speed)
-    return position + steps
-
-
-# Function to load the motor positions from a file
-def load_motor_positions():
-    try:
-        with open(POSITIONS_FILE, "r") as file:
-            positions = file.readline().strip().split(",")
-            if len(positions) == 3:
-                return list(map(int, positions))
-    except FileNotFoundError:
-        pass
-    # If the file doesn't exist or the positions couldn't be loaded, return default positions
-    return [0, 0, 0]
+    def move(self, target_position):
+        steps = int(target_position - self.position)
+        direction = "counter-clockwise" if steps > 0 else "clockwise"
+        self.rotate(abs(steps), direction)
+        self.position += steps
 
 
-# Function to save the motor positions to a file
-def save_motor_positions(f_position, i_position, z_position):
-    try:
-        with open(POSITIONS_FILE, "w") as file:
-            file.write(f"{f_position},{i_position},{z_position}")
+class MotorController:
+    def __init__(self, f_motor, i_motor, z_motor, shdn):
+        self.f_motor = f_motor
+        self.i_motor = i_motor
+        self.z_motor = z_motor
+        self.shdn = shdn
 
-        # Prepare data to be sent
-        data = {
-            "deviceId": "jetson1",
-            "f_position": f_position,
-            "i_position": i_position,
-            "z_position": z_position
-        }
+    def setup(self):
+        GPIO.setmode(GPIO.BOARD)
+        pins = [self.f_motor.step_pin, self.f_motor.dir_pin, self.f_motor.sleep_pin,
+                self.i_motor.step_pin, self.i_motor.dir_pin, self.i_motor.sleep_pin,
+                self.z_motor.step_pin, self.z_motor.dir_pin, self.z_motor.sleep_pin]
+        GPIO.setup(pins, GPIO.OUT)
+        GPIO.setup(self.shdn, GPIO.OUT)
 
-        # Send a POST request to the server
-        response = requests.post(f"{URL}/api/motor-positions", json=data, timeout=5)
-        # Print the server's response (for debugging purposes)
-        print(response.text)
+        # Pull sleep pins LOW at the start
+        GPIO.output(pins[2::3], GPIO.LOW)
+        GPIO.output(self.shdn, GPIO.LOW)
 
-        # Check the server's response
-        if response.status_code != 200:
-            raise ValueError(f"Error from server: {response.text}")
-    except Timeout:
-        print("Request timed out ")
-    except Exception as e:
-        print(f"Error in save_motor_positions: {e}")
+    def cleanup(self):
+        GPIO.cleanup()
+
+
+class ServerRequest:
+    @staticmethod
+    def post(data):
+        try:
+            response = requests.post(f"{URL}/api/motor-positions", json=data, timeout=5)
+            # Check the server's response
+            if response.status_code != 200:
+                raise ValueError(f"Error from server: {response.text}")
+        except Timeout:
+            print("Request timed out ")
+        except Exception as e:
+            print(f"Error in save_motor_positions: {e}")
+
+
+class MotorPositionFile:
+    def __init__(self, filename="motor_positions.txt"):
+        self.filename = filename
+        if not os.path.exists(self.filename):
+            with open(self.filename, "w") as file:
+                file.write("0,0,0")
+
+    def load(self):
+        try:
+            with open(self.filename, "r") as file:
+                positions = file.readline().strip().split(",")
+                if len(positions) == 3:
+                    return list(map(int, positions))
+        except FileNotFoundError:
+            pass
+        return [0, 0, 0]
+
+    def save(self, f_position, i_position, z_position):
+        try:
+            with open(self.filename, "w") as file:
+                file.write(f"{f_position},{i_position},{z_position}")
+            data = {
+                "deviceId": "jetson1",
+                "f_position": f_position,
+                "i_position": i_position,
+                "z_position": z_position
+            }
+            ServerRequest.post(data)
+        except Exception as e:
+            print(f"Error in save_motor_positions: {e}")
 
 
 # Main program
 if __name__ == "__main__":
-    print("Setting up GPIO...")
-    setup_gpio()
+    # Setup GPIO
+    motor_controller = MotorController(
+        f_motor=Motor(F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN, F_SPEED, SHDN),
+        i_motor=Motor(I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN, I_SPEED, SHDN),
+        z_motor=Motor(Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN, Z_SPEED, SHDN),
+        shdn=SHDN
+    )
+    motor_controller.setup()
 
-    print("loading motor pos")
     # Load motor positions from the file
-    f_position, i_position, z_position = load_motor_positions()
+    positions_file = MotorPositionFile()
+    f_position, i_position, z_position = positions_file.load()
+    motor_controller.f_motor.position = f_position
+    motor_controller.i_motor.position = i_position
+    motor_controller.z_motor.position = z_position
 
-    print("saving motor pos")
-    # Save motor positions on setup (this is so we can retrieve on web app without needing to change values)
-    save_motor_positions(f_position, i_position, z_position)
+    # Save motor positions on setup
+    positions_file.save(f_position, i_position, z_position)
 
-    print("while loop")
+    # Main loop
     while True:
-        print("F Motor Position:", f_position)
-        print("I Motor Position:", i_position)
-        print("Z Motor Position:", z_position)
+        print("F Motor Position:", motor_controller.f_motor.position)
+        print("I Motor Position:", motor_controller.i_motor.position)
+        print("Z Motor Position:", motor_controller.z_motor.position)
         print("F Motor %:", (f_position))
         print("I Motor %:", (i_position))
         print("Z Motor %:", (z_position))
 
-        GPIO.output([F_SLEEP_PIN, I_SLEEP_PIN, Z_SLEEP_PIN], GPIO.LOW)
+        GPIO.output([motor_controller.f_motor.sleep_pin, motor_controller.i_motor.sleep_pin, motor_controller.z_motor.sleep_pin], GPIO.LOW)
 
         # Terminal input for motor coordinate and axis
         # Note: enter it in steps!
@@ -198,22 +205,21 @@ if __name__ == "__main__":
 
         if motor_input == "q":
             # Save motor positions before quitting
-            save_motor_positions(f_position, i_position, z_position)
+            positions_file.save(motor_controller.f_motor.position, motor_controller.i_motor.position, motor_controller.z_motor.position)
             break
 
         axis, target_coord = motor_input.split(',')
         target_position = int(target_coord)
 
         if axis == "f":
-            f_position = move_motor(F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN, f_position, target_position, F_SPEED)
-            save_motor_positions(f_position, i_position, z_position)
+            motor_controller.f_motor.move(target_position)
         elif axis == "i":
-            i_position = move_motor(I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN, i_position, target_position, I_SPEED)
-            save_motor_positions(f_position, i_position, z_position)
+            motor_controller.i_motor.move(target_position)
         elif axis == "z":
-            z_position = move_motor(Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN, z_position, target_position, Z_SPEED)
-            save_motor_positions(f_position, i_position, z_position)
+            motor_controller.z_motor.move(target_position)
         else:
             print("Invalid motor axis. Please try again.")
 
-    cleanup_gpio()
+        positions_file.save(motor_controller.f_motor.position, motor_controller.i_motor.position, motor_controller.z_motor.position)
+
+    motor_controller.cleanup()
