@@ -167,6 +167,7 @@ fov-cameras-web-app
 ├─ flowcharts
 │  └─ flowchart.drawio
 ├─ jetson
+|  ├─ .env
 │  ├─ camera_control_pid.txt
 │  ├─ ip_address.txt
 │  ├─ jetson_stream_simulator.py
@@ -178,6 +179,7 @@ fov-cameras-web-app
 │  └─ stepperTests.py
 ├─ README.md
 └─ server
+   ├─ .env
    ├─ .dockerignore
    ├─ .ebextensions
    │  └─ python.config
@@ -192,5 +194,4 @@ fov-cameras-web-app
    ├─ server.py
    ├─ stream_manager.py
    └─ __pycache__
-
 ```
