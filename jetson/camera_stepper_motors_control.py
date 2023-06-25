@@ -2,6 +2,7 @@ import os
 import requests
 import sys
 import time
+from requests.exceptions import Timeout
 
 from utils.utility_funcs import load_env
 
@@ -152,14 +153,15 @@ def save_motor_positions(f_position, i_position, z_position):
         }
 
         # Send a POST request to the server
-        response = requests.post(f"{URL}/api/motor-positions", json=data)
+        response = requests.post(f"{URL}/api/motor-positions", json=data, timeout=5)
         # Print the server's response (for debugging purposes)
         print(response.text)
 
         # Check the server's response
         if response.status_code != 200:
             raise ValueError(f"Error from server: {response.text}")
-
+    except Timeout:
+        print("Request timed out ")
     except Exception as e:
         print(f"Error in save_motor_positions: {e}")
 
