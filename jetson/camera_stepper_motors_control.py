@@ -6,6 +6,8 @@ from requests.exceptions import Timeout
 
 from utils.utility_funcs import load_env
 
+print("yo mama")
+
 # Load environment variables
 load_env()
 URL = os.environ.get('REACT_APP_URL')
