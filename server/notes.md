@@ -36,6 +36,9 @@ gst-launch-1.0 -v udpsrc port=5001 ! application/x-rtp,encoding-name=H264,payloa
     - `docker run -p 5000:5000 opencv-gstreamer:latest`
       - Note that this command assumes that you are running the server on port 5000. It also assumes you have a `CMD` in 
         your Dockerfile that runs the server.
+1. Kill Docker container
+    - List all running containers: `docker ps`
+    - `docker kill $(docker ps -q)`
 
 We will now have the server running, we will still need to set up the client in a separate terminal running `npm start`. 
 
