@@ -79,8 +79,7 @@ def create_app():
         return jsonify({"message": "Data received"}), 200
 
     @app.route('/api/command', methods=['POST'])
-    @authenticate
-    def post_command(user):
+    def post_command():
         data = request.get_json()
         deviceId = data['deviceId']
         command = data['command']
