@@ -20,7 +20,7 @@ export default function App() {
   const status = useStatus(useFirebase);
   const { user, email, setEmail, password, setPassword, errorMessage, handleLogin } = useAuth();
 
-  console.log("status:", status);
+  // console.log("status:", status);
 
   return (
     <div className="App">
