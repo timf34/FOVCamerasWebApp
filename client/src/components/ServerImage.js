@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import StreamContext from './StreamContext';
 
 const ServerImage = () => {
   const [imageSrc, setImageSrc] = useState(null);
   const [error, setError] = useState(null);
   const newImage = useRef(new Image());
+  const { isStreaming } = useContext(StreamContext);
 
   useEffect(() => {
     fetchImage();
@@ -12,9 +14,13 @@ const ServerImage = () => {
 
     // Clean up the interval on unmount
     return () => clearInterval(interval);
-  }, []);
+  }, [isStreaming]);
 
   const fetchImage = async () => {
+    if (!isStreaming) {
+      // If the streaming is stopped, we don't try to fetch the image
+      return;
+    }
     try {
       console.log("REACT_APP_URL: " + process.env.REACT_APP_URL);
       const response = await fetch(`${process.env.REACT_APP_URL}/api/image`);

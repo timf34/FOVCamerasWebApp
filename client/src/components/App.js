@@ -10,10 +10,12 @@ import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
 import RecordVideoForm from './StartStopRecordVideoScript';
+import { StreamProvider } from './StreamContext';
 import '../stylesheets/App.css'
 
 export default function App() {
   const [useFirebase, setUseFirebase] = useState(false);  // set to true to use firebase database listening, false to use websocket listening
+  const [isStreaming, setStreaming] = useState(false);
 
   const status = useStatus(useFirebase);
   const { user, email, setEmail, password, setPassword, errorMessage, handleLogin } = useAuth();
@@ -36,19 +38,22 @@ export default function App() {
 
           <div className="component-container">
             <CommandButton />
+          {/*  Note that this doens't work rn...*/}
           </div>
 
           <div className='component-container'>
             <h3><u>Camera Streaming</u></h3>
           </div>
 
-          <div className="component-container">
-            <CameraStreamForm />
-          </div>
+          <StreamProvider value={{ isStreaming, setStreaming }}>
+            <div className="component-container">
+              <CameraStreamForm />
+            </div>
 
-          <div className="component-container">
-            <ServerImage />
-          </div>
+            <div className="component-container">
+              <ServerImage />
+            </div>
+          </StreamProvider>
 
           <div className='component-container'>
             <h3><u>Motor Control</u></h3>

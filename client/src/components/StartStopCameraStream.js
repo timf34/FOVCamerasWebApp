@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { auth } from './firebase';
+import StreamContext from './StreamContext';
 
 export default function CameraStreamForm() {
   const [deviceId, setDeviceId] = useState('jetson1');
   const [action, setAction] = useState('start-stream');
+  const { isStreaming, setStreaming } = useContext(StreamContext);
 
   const handleActionChange = (event) => {
     setAction(event.target.value);
@@ -17,6 +19,12 @@ export default function CameraStreamForm() {
       return;
     } else {
       console.log('User logged in:', auth.currentUser.email);
+    }
+
+    if (action === 'start-stream') {
+      setStreaming(true);
+    } else {
+      setStreaming(false);
     }
 
     const token = await auth.currentUser.getIdToken();
@@ -45,8 +53,8 @@ export default function CameraStreamForm() {
       <label>
         Select action:
         <select value={action} onChange={handleActionChange}>
-          <option value="start-stream">Start Camera Stream Control</option>
-          <option value="stop-stream">Stop Camera Stream Control</option>
+          <option value="start-stream">Start Camera Stream</option>
+          <option value="stop-stream">Stop Camera Stream</option>
         </select>
       </label>
       <label>
