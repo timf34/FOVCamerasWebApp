@@ -53,6 +53,7 @@ class NamespaceHandler(Client):
 
     @staticmethod
     def on_connect() -> None:
+        sio.emit('device_id', deviceId)  # Send the device ID to the server; this is called when we reconnect to server
         print('Connected to the server')
 
     @staticmethod
@@ -167,8 +168,7 @@ sio.on('start_record_video_script', sio.on_start_record_video)
 sio.on('stop_record_video_script', sio.on_stop_record_video)
 
 # Emit the device_id event
-sio.emit('device_id', deviceId)
-
+sio.emit('device_id', deviceId)  # This is called when the server is running already when we connect
 
 # Start a new thread for periodically sending status updates
 def send_status_updates() -> None:
