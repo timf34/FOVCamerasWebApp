@@ -6,7 +6,7 @@ from requests.exceptions import Timeout
 
 from utils.utility_funcs import load_env
 
-print("yo mamacagain")
+print("yo mamacagain and again")
 
 # Load environment variables
 load_env()
