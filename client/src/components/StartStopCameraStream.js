@@ -49,6 +49,13 @@ export default function CameraStreamForm() {
           <option value="stop-stream">Stop Camera Stream Control</option>
         </select>
       </label>
+      <label>
+        Select Device:
+        <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
+          <option value="jetson1">Jetson 1</option>
+          <option value="jetson2">Jetson 2</option>
+        </select>
+      </label>
       <button type="submit">Submit</button>
     </form>
   );
