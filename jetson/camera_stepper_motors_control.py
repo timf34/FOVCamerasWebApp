@@ -11,7 +11,7 @@ load_env()
 URL = os.environ.get('REACT_APP_URL')
 
 # Simulation flag
-SIMULATION_MODE = False
+SIMULATION_MODE = True
 
 try:
     import Jetson.GPIO as GPIO
@@ -80,7 +80,7 @@ class Motor:
 
         # Rotate the motor
         if not SIMULATION_MODE:
-            for i in range(steps):
+            for i in range(1, steps + 1):
                 # Calculate acceleration
                 acceleration_factor = min(i, 10)  # We only increment speed for the first 10 steps
                 effective_speed = self.speed * (acceleration_factor / 10)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         print("F Motor Position:", motor_controller.f_motor.position)
         print("I Motor Position:", motor_controller.i_motor.position)
         print("Z Motor Position:", motor_controller.z_motor.position)
-        print("F Motor %:", (f_position))
+        print("F Motor %:", (motor_controller.z_motor.position / 69))  # Find out what the proper percentage ratio is here!
         print("I Motor %:", (i_position))
         print("Z Motor %:", (z_position))
 
