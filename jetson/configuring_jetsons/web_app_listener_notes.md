@@ -1,3 +1,17 @@
+## Setup
+
+Run the following command to set up the web_app_listener service. 
+
+Note that you need sudo privileges to run this command.
+
+```bash
+chmod +x web_app_listener_setup.sh 
+sudo ./web_app_listener_setup.sh
+```
+
+
+## Old notes 
+
 You can use systemd services to manage the execution of your Python script in the background when your Nvidia Jetson Nano connects to the internet.
 
 Here are the steps you need to follow:
