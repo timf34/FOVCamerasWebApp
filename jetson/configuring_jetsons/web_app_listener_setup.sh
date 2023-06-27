@@ -34,10 +34,10 @@ sudo chmod 644 $SERVICE_FILE_PATH
 sudo systemctl daemon-reload
 
 # Enable the service so that it starts on boot
-sudo systemctl enable jetson_script.service
+sudo systemctl enable jetson_simulator.service
 
 # Start the service immediately
-sudo systemctl start jetson_script.service
+sudo systemctl start jetson_simulator.service
 
 # Check the status of the service
-sudo systemctl status jetson_script.service
+sudo systemctl status jetson_simulator.service
