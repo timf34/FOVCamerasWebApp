@@ -5,11 +5,11 @@
 # Define the service file path
 SERVICE_FILE_PATH="/etc/systemd/system/jetson_simulator.service"
 
-# Define the python script path
-PYTHON_SCRIPT_PATH="/home/timf34/Desktop/FOVCamerasWebApp/jetson/jetson_simulator.py"
-
 # Define the user
 USER_NAME="timf34"
+
+# Define the python script path
+PYTHON_SCRIPT_PATH="/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson/jetson_simulator.py"
 
 # Create the service file with the appropriate content
 echo "[Unit]
@@ -22,7 +22,7 @@ User=$USER_NAME
 ExecStart=/usr/bin/python3 $PYTHON_SCRIPT_PATH $DEVICE_NAME
 Restart=always
 Environment=\"PATH=/usr/bin:/bin:/usr/sbin:/sbin\"
-EnvironmentFile=/home/tim/Desktop/FOVCamerasWebApp/jetson/.env
+EnvironmentFile=/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson/.env
 
 [Install]
 WantedBy=multi-user.target" | sudo tee $SERVICE_FILE_PATH
