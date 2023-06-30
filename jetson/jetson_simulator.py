@@ -28,6 +28,9 @@ from utils.utility_funcs import load_env
 
 load_env()
 URL = os.environ.get('REACT_APP_URL')
+# Check if it contains http or https
+if URL.startswith('https'):
+    print("Warning: URL starts with https. We are generally using http for local development.")
 
 
 def get_wifi_status() -> bool:
