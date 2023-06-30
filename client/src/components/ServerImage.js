@@ -10,7 +10,7 @@ const ServerImage = () => {
 
     useEffect(() => {
         fetchImage();
-        const interval = setInterval(fetchImage, 200);  // Fetch a new image every 1/3 second
+        const interval = setInterval(fetchImage, 50);
 
         // Clean up the interval on unmount
         return () => clearInterval(interval);
@@ -56,7 +56,7 @@ const ServerImage = () => {
     return (
         <TransformWrapper>
             <TransformComponent>
-                {imageSrc ? <img src={imageSrc} alt="From server" /> : <div>Loading...</div>}
+                {imageSrc ? <img src={imageSrc} alt="From server" /> : <div>No stream to show...</div>}
                 {error && <div className="error-popup">Error loading image: {error}</div>}
             </TransformComponent>
         </TransformWrapper>
