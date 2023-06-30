@@ -1,6 +1,7 @@
 import cv2
 import os
 import requests
+import time
 from utils.utility_funcs import load_env
 
 load_env()
@@ -19,7 +20,12 @@ else:
 while True:
     # Read a frame from the camera
     print("Reading frame...")
+    # Before reading the frame
+    start_time = time.time()
     ret, frame = cap.read()
+    end_time = time.time()
+    print("Time taken to read frame: ", end_time - start_time)
+
 
     if not ret:
         print("Failed to read frame.")
@@ -38,7 +44,10 @@ while True:
         break
 
     # Send the JPEG image to the server
+    start_time = time.time()
     response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
+    end_time = time.time()
+    print("Time taken to send frame: ", end_time - start_time)
 
     if response.status_code != 200:
         print("Failed to send frame.")
