@@ -11,6 +11,9 @@ USER_NAME="timf34"
 # Define the python script path
 PYTHON_SCRIPT_PATH="/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson/jetson_simulator.py"
 
+# Define the working directory
+WORKING_DIRECTORY="/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson"
+
 # Create the service file with the appropriate content
 echo "[Unit]
 Description=Python Script jetson_simulator
@@ -19,6 +22,7 @@ After=network-online.target
 
 [Service]
 User=$USER_NAME
+WorkingDirectory=$WORKING_DIRECTORY
 ExecStart=/usr/bin/python3 $PYTHON_SCRIPT_PATH $DEVICE_NAME
 Restart=always
 Environment=\"PATH=/usr/bin:/bin:/usr/sbin:/sbin\"
