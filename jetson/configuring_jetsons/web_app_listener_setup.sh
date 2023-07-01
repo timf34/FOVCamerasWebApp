@@ -25,6 +25,9 @@ User=$USER_NAME
 WorkingDirectory=$WORKING_DIRECTORY
 ExecStart=/usr/bin/python3 $PYTHON_SCRIPT_PATH $DEVICE_NAME
 Restart=always
+RestartSec=15s
+StartLimitIntervalSec=0
+StartLimitBurst=0
 Environment=\"PATH=/usr/bin:/bin:/usr/sbin:/sbin\"
 EnvironmentFile=/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson/.env
 
