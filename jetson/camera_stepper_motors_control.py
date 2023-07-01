@@ -162,8 +162,10 @@ class MotorPositionFile:
         try:
             with open(self.filename, "w") as file:
                 file.write(f"{f_position},{i_position},{z_position}")
+            # TODO: should raise a warning if the env variable doesn't exist!
+            device_name = os.getenv("DEVICE_NAME", "jetson1")
             data = {
-                "deviceId": "jetson1",
+                "deviceId": device_name,
                 "f_position": f_position,
                 "i_position": i_position,
                 "z_position": z_position
