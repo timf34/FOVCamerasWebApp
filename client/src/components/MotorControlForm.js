@@ -52,6 +52,13 @@ export default function MotorControlForm() {
                 Percentage:
                 <input type="number" value={percentage} onChange={(e) => setPercentage(e.target.value)} />
             </label>
+            <label>
+                Select Device:
+                <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
+                  <option value="jetson1">Jetson 1</option>
+                  <option value="jetson2">Jetson 2</option>
+                </select>
+            </label>
             <button onClick={moveMotor}>
                 Move Motor
             </button>
