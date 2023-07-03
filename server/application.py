@@ -116,6 +116,28 @@ def create_app():
         else:
             return jsonify({"message": "Device not connected"}), 400
 
+    @app.route('/api/start-high-computation', methods=['POST'])
+    def handle_start_high_computation():
+        print("Start high computation script")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('start_high_computation', room=server.connections[deviceId])
+            return jsonify({"message": "High computation start command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
+    @app.route('/api/stop-high-computation', methods=['POST'])
+    def handle_stop_high_computation():
+        print("Stop high computation script")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('stop_high_computation', room=server.connections[deviceId])
+            return jsonify({"message": "High computation stop command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
     @app.route('/api/send-input', methods=['POST'])
     def handle_send_input():
         print("Send input to script")
