@@ -79,13 +79,13 @@ export default function App() {
           {/*<div className='component-container'>*/}
           {/*  <RecordVideoForm />*/}
           {/*</div>*/}
-          <div className='component-container'>
-            <h3><u>High Computation Script</u></h3>
-          </div>
+          {/*<div className='component-container'>*/}
+          {/*  <h3><u>High Computation Script</u></h3>*/}
+          {/*</div>*/}
 
-          <div className='component-container'>
-            <HighComputationForm />
-          </div>
+          {/*<div className='component-container'>*/}
+          {/*  <HighComputationForm />*/}
+          {/*</div>*/}
         </div>
       )}
     </div>
