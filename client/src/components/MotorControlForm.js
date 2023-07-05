@@ -66,7 +66,7 @@ export default function MotorControlForm() {
 
     return (
         <div>
-            {errorMessage && <p>Error: {errorMessage}</p>}
+            {errorMessage && <p style={{ color: 'red' }}>Error: {errorMessage}</p>}
             <label>
                 Axis:
                 <select name="axis" value={axis} onChange={handleChange}>
