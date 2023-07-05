@@ -9,6 +9,7 @@ import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
+import DeviceSelection from "./DeviceSelection";
 import { StreamProvider } from './StreamContext';
 import '../stylesheets/App.css'
 
@@ -37,7 +38,14 @@ export default function App() {
 
           <div className="component-container">
             <CommandButton />
-          {/*  Note that this doens't work rn...*/}
+          </div>
+
+          <div className='component-container'>
+            <h3><u>Device Selection</u></h3>
+          </div>
+
+          <div className="component-container">
+            <DeviceSelection />
           </div>
 
           <div className='component-container'>

@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { auth } from './firebase';
 import {useForm} from "./useForm";
+import DeviceContext from "./DeviceContext";
 
 export default function MotorControlForm() {
     const [values, handleChange] = useForm({
-        deviceId: 'jetson1',
         axis: '',
         steps: '',
         mode: '',
     });
 
-    const { deviceId, axis, steps, mode } = values;
+    const { deviceId, setDeviceId } = useContext(DeviceContext);
+    const { axis, steps, mode } = values;
     const [errorMessage, setErrorMessage] = useState('');
     const maxSteps = { "f,": 9353, "i,": 75, "z,": 4073 };
 
@@ -28,6 +29,7 @@ export default function MotorControlForm() {
         const token = await auth.currentUser.getIdToken();
 
         console.log('Token:', token);
+        console.log('Device ID:', deviceId);
 
         // Calculate the steps or percentage depending on the selection
         let calculatedSteps = steps;
@@ -87,13 +89,6 @@ export default function MotorControlForm() {
             <label>
                 Input Value:
                 <input name="steps" type="number" value={steps} onChange={handleChange} />
-            </label>
-            <label>
-                Select Device:
-                <select name="deviceId" value={deviceId} onChange={handleChange} >
-                  <option value="jetson1">Jetson 1</option>
-                  <option value="jetson2">Jetson 2</option>
-                </select>
             </label>
             <button onClick={moveMotor}>
                 Move Motor

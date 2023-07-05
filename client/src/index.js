@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './components/App';
+import {DeviceProvider} from "./components/DeviceContext";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <React.StrictMode>
+        <DeviceProvider>
+            <App/>
+        </DeviceProvider>
+    </React.StrictMode>
 );
