@@ -1,60 +1,44 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from './useForm';
 import '../stylesheets/MotorPositions.css'
 
-class MotorPositions extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            response: {},
-            selectedDevice: 'jetson1',  // default to jetson1
-        };
-    }
+function MotorPositions() {
+    const initialState = { selectedDevice: 'jetson1' };
+    const [values, handleChange] = useForm(initialState);
+    const [response, setResponse] = useState({});
 
-    componentDidMount() {
-        this.fetchMotorPositions();
-    }
-
-    fetchMotorPositions = () => {
-        const { selectedDevice } = this.state;
+    const fetchMotorPositions = () => {
+        const { selectedDevice } = values;
         fetch(`${process.env.REACT_APP_URL}/api/get-motor-positions/${selectedDevice}`)
             .then(response => response.json())
-            .then(data => {
-                this.setState({ response: data });
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            .then(data => setResponse(data))
+            .catch((error) => console.error('Error:', error));
     };
 
-    handleDeviceChange = (event) => {
-        this.setState({ selectedDevice: event.target.value });
-    };
+    useEffect(() => {
+        fetchMotorPositions();
+    }, [values.selectedDevice]);
 
-    render() {
-        const { response, selectedDevice } = this.state;
-    
-        return (
-            <div className="container">
-                <h5>Motor Positions</h5>
-                <div className="select">
-                    <label>Select device: </label>
-                    <select value={selectedDevice} onChange={this.handleDeviceChange}>
-                        <option value="jetson1">jetson1</option>
-                        <option value="jetson2">jetson2</option>
-                        <option value="jetson3">jetson3</option>
-                        <option value="jetson4">jetson4</option>
-                    </select>
-                </div>
-                <div className="pre">
-                    {Object.entries(response).map(([key, value], i) => (
-                        <p key={i}><b>{key}:</b> {value}</p>
-                    ))}
-                </div>
-                <button className="button" onClick={this.fetchMotorPositions}>Refresh</button>
+    return (
+        <div className="container">
+            <h5>Motor Positions</h5>
+            <div className="select">
+                <label>Select device: </label>
+                <select name="selectedDevice" value={values.selectedDevice} onChange={handleChange}>
+                    <option value="jetson1">jetson1</option>
+                    <option value="jetson2">jetson2</option>
+                    <option value="jetson3">jetson3</option>
+                    <option value="jetson4">jetson4</option>
+                </select>
             </div>
-        );
-    }
-    
+            <div className="pre">
+                {Object.entries(response).map(([key, value], i) => (
+                    <p key={i}><b>{key}:</b> {value}</p>
+                ))}
+            </div>
+            <button className="button" onClick={fetchMotorPositions}>Refresh</button>
+        </div>
+    );
 }
 
 export default MotorPositions;
