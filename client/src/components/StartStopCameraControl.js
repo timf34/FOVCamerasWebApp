@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {useForm} from "./useForm";
 import { auth } from './firebase';
+import DeviceContext from "./DeviceContext";
 
 export default function CameraControlForm() {
   const [values, handleChange] = useForm({
-    deviceId: 'jetson1',
     action: 'start',
   });
-  const { deviceId, action } = values;
+  const { deviceId, setDeviceId } = useContext(DeviceContext);
+  const { action } = values;
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -47,13 +48,6 @@ export default function CameraControlForm() {
         <select name="action" value={action} onChange={handleChange}>
           <option value="start">Start Camera Control</option>
           <option value="stop">Stop Camera Control</option>
-        </select>
-      </label>
-      <label>
-        Select Device:
-        <select name="deviceId" value={deviceId} onChange={handleChange}>
-          <option value="jetson1">Jetson 1</option>
-          <option value="jetson2">Jetson 2</option>
         </select>
       </label>
       <button type="submit">Submit</button>

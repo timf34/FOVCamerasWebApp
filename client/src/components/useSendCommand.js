@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { auth } from './firebase'; 
+import React, { useState, useContext } from 'react';
+import { auth } from './firebase';
+import DeviceContext from "./DeviceContext";
 
 export default function CommandButton() {
-    const [deviceId, setDeviceId] = useState('jetson1'); 
     const [command, setCommand] = useState('print hello world');
+    const { deviceId, setDeviceId } = useContext(DeviceContext);
 
     const sendCommand = async () => {
         if (!auth.currentUser) {
@@ -16,6 +17,7 @@ export default function CommandButton() {
         const token = await auth.currentUser.getIdToken();
 
         console.log('Token:', token);
+        console.log('deviceId:', deviceId)
 
         const response = await fetch(`${process.env.REACT_APP_URL}/api/command`, {
             method: 'POST',
@@ -37,12 +39,6 @@ export default function CommandButton() {
 
     return (
         <div>
-            <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
-                <option value="jetson1">jetson1</option>
-                <option value="jetson2">jetson2</option>
-                <option value="jetson3">jetson3</option>
-                <option value="jetson4">jetson4</option>
-            </select>
             <button onClick={sendCommand}>
                 Send Command
             </button>

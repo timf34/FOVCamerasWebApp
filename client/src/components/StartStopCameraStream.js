@@ -2,19 +2,23 @@ import React, { useContext } from 'react';
 import { useForm } from "./useForm";
 import { auth } from './firebase';
 import StreamContext from './StreamContext';
+import DeviceContext from './DeviceContext';
 
 export default function CameraStreamForm() {
   const { isStreaming, setStreaming } = useContext(StreamContext);
+  const { deviceId, setDeviceId } = useContext(DeviceContext);
 
   const [values, handleChange] = useForm({
-    deviceId: 'jetson1',
     action: 'start-stream',
   });
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    const { deviceId, action } = values;
+    const { action } = values;
+
+    console.log('deviceId:', deviceId);
+
 
     if (!auth.currentUser) {
       console.error('User not logged in');
@@ -57,13 +61,6 @@ export default function CameraStreamForm() {
           <select name="action" value={values.action} onChange={handleChange}>
             <option value="start-stream">Start Camera Stream</option>
             <option value="stop-stream">Stop Camera Stream</option>
-          </select>
-        </label>
-        <label>
-          Select Device:
-          <select name="deviceId" onChange={handleChange} value={values.deviceId}>
-            <option value="jetson1">Jetson 1</option>
-            <option value="jetson2">Jetson 2</option>
           </select>
         </label>
         <button type="submit">Submit</button>
