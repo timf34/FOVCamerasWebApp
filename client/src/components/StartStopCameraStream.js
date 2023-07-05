@@ -1,18 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
+import { useForm } from "./useForm";
 import { auth } from './firebase';
 import StreamContext from './StreamContext';
 
 export default function CameraStreamForm() {
-  const [deviceId, setDeviceId] = useState('jetson1');
-  const [action, setAction] = useState('start-stream');
   const { isStreaming, setStreaming } = useContext(StreamContext);
 
-  const handleActionChange = (event) => {
-    setAction(event.target.value);
-  };
+  const [values, handleChange] = useForm({
+    deviceId: 'jetson1',
+    action: 'start-stream',
+  });
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+
+    const { deviceId, action } = values;
 
     if (!auth.currentUser) {
       console.error('User not logged in');
@@ -49,22 +51,22 @@ export default function CameraStreamForm() {
   };
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <label>
-        Select action:
-        <select value={action} onChange={handleActionChange}>
-          <option value="start-stream">Start Camera Stream</option>
-          <option value="stop-stream">Stop Camera Stream</option>
-        </select>
-      </label>
-      <label>
-        Select Device:
-        <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
-          <option value="jetson1">Jetson 1</option>
-          <option value="jetson2">Jetson 2</option>
-        </select>
-      </label>
-      <button type="submit">Submit</button>
-    </form>
+      <form onSubmit={handleFormSubmit}>
+        <label>
+          Select action:
+          <select name="action" value={values.action} onChange={handleChange}>
+            <option value="start-stream">Start Camera Stream</option>
+            <option value="stop-stream">Stop Camera Stream</option>
+          </select>
+        </label>
+        <label>
+          Select Device:
+          <select name="deviceId" onChange={handleChange} value={values.deviceId}>
+            <option value="jetson1">Jetson 1</option>
+            <option value="jetson2">Jetson 2</option>
+          </select>
+        </label>
+        <button type="submit">Submit</button>
+      </form>
   );
 }

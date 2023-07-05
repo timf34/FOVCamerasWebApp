@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { auth } from './firebase'; 
+import { auth } from './firebase';
+import {useForm} from "./useForm";
 
 export default function MotorControlForm() {
-    const [deviceId, setDeviceId] = useState('jetson1'); 
-    const [axis, setAxis] = useState('');
-    const [steps, setSteps] = useState('');
-    const [usePercentage, setUsePercentage] = useState(false);
+    const [values, handleChange] = useForm({
+        deviceId: 'jetson1',
+        axis: '',
+        steps: '',
+        mode: '',
+    });
 
+    const { deviceId, axis, steps, mode } = values;
+    const [errorMessage, setErrorMessage] = useState('');
     const maxSteps = { "f,": 9353, "i,": 75, "z,": 4073 };
 
     const moveMotor = async () => {
         if (!auth.currentUser) {
-            console.error('User not logged in');
+            const error = 'User not logged in';
+            console.error(error);
+            setErrorMessage(error);
             return;
         }
         else {
@@ -24,7 +31,16 @@ export default function MotorControlForm() {
 
         // Calculate the steps or percentage depending on the selection
         let calculatedSteps = steps;
-        if (usePercentage) {
+
+        // TODO: add a warning and fix to say that the input has to be between 100 and 0 if the percentage is selected
+        if (mode === 'percentage') {
+
+            if (steps > 100 || steps < 0) {
+                const error = 'Percentage should be between 0 and 100';
+                console.error(error);
+                setErrorMessage(error);
+            }
+
             calculatedSteps = Math.round((steps / 100) * maxSteps[axis]);
         }
 
@@ -50,9 +66,10 @@ export default function MotorControlForm() {
 
     return (
         <div>
+            {errorMessage && <p>Error: {errorMessage}</p>}
             <label>
                 Axis:
-                <select value={axis} onChange={(e) => setAxis(e.target.value)}>
+                <select name="axis" value={axis} onChange={handleChange}>
                     <option value="">--Select an axis--</option>
                     <option value="f,">F</option>
                     <option value="i,">I</option>
@@ -61,19 +78,19 @@ export default function MotorControlForm() {
             </label>
             <label>
                 Mode:
-                <select value={usePercentage} onChange={(e) => setUsePercentage(e.target.value === 'true')}>
-                    <option value={false}>--Select mode--</option>
-                    <option value={false}>Steps</option>
-                    <option value={true}>Percentage</option>
+                <select name="mode" value={mode} onChange={handleChange}>
+                    <option value=''>--Select mode--</option>
+                    <option value='steps'>Steps</option>
+                    <option value='percentage'>Percentage</option>
                 </select>
             </label>
             <label>
                 Input Value:
-                <input type="number" value={steps} onChange={(e) => setSteps(e.target.value)} />
+                <input name="steps" type="number" value={steps} onChange={handleChange} />
             </label>
             <label>
                 Select Device:
-                <select onChange={e => setDeviceId(e.target.value)} value={deviceId}>
+                <select name="deviceId" value={deviceId} onChange={handleChange} >
                   <option value="jetson1">Jetson 1</option>
                   <option value="jetson2">Jetson 2</option>
                 </select>
