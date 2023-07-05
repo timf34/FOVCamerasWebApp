@@ -9,9 +9,7 @@ import MotorControlForm from './MotorControlForm';
 import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
-import RecordVideoForm from './StartStopRecordVideoScript';
 import { StreamProvider } from './StreamContext';
-import HighComputationForm from "./StartStopHighComputation";
 import '../stylesheets/App.css'
 
 export default function App() {
@@ -71,21 +69,6 @@ export default function App() {
           <div className='component-container'>
             <MotorPositions />
           </div>
-
-          {/*<div className='component-container'>*/}
-          {/*  <h3><u>Record Video Script</u></h3>*/}
-          {/*</div>*/}
-
-          {/*<div className='component-container'>*/}
-          {/*  <RecordVideoForm />*/}
-          {/*</div>*/}
-          {/*<div className='component-container'>*/}
-          {/*  <h3><u>High Computation Script</u></h3>*/}
-          {/*</div>*/}
-
-          {/*<div className='component-container'>*/}
-          {/*  <HighComputationForm />*/}
-          {/*</div>*/}
         </div>
       )}
     </div>
