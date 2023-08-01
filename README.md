@@ -68,7 +68,7 @@ For Python server:
     ```
 4. Start the server:
     ```bash
-    python server.py
+    python application.py
     ```
 5. Start the Jetson simulator:
    ```bash
