@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import Login from './Login';
 import StatusList from './StatusList';
 import useStatus from './useStatus';
-import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
@@ -18,15 +16,9 @@ export default function App() {
   const [isStreaming, setStreaming] = useState(false);
 
   const status = useStatus(useFirebase);
-  const { user, email, setEmail, password, setPassword, errorMessage, handleLogin } = useAuth();
-
-  // console.log("status:", status);
 
   return (
-    <div className="App">
-      {!user ? (
-        <Login email={email} setEmail={setEmail} password={password} setPassword={setPassword} errorMessage={errorMessage} handleLogin={handleLogin} />
-      ) : (
+      <div className="App">
         <div>
           <div className='component-container'>
             <h3><u>Device Diagnostics</u></h3>
@@ -78,7 +70,6 @@ export default function App() {
             <MotorPositions />
           </div>
         </div>
-      )}
-    </div>
+      </div>
   );
 }

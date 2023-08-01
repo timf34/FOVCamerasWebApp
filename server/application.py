@@ -7,34 +7,13 @@ import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from firebase_admin import auth, db
+from firebase_admin import db
 from server import Server
 from time import time
 
 socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet', cors_allowed_origins="*")
 
 last_received_motor_positions = {}
-
-
-def authenticate(f):
-    """A decorator to authenticate requests"""
-
-    @wraps(f)
-    def decorated_function(*args, **kws):
-        id_token = None
-        if 'Authorization' in request.headers:
-            id_token = request.headers['Authorization'].split(' ').pop()
-        if not id_token:
-            return jsonify({"message": "Token required"}), 401
-        try:
-            decoded_token = auth.verify_id_token(id_token)
-            decoded_token = decoded_token.items()
-            return f(decoded_token, *args, **kws)
-        except Exception as e:
-            print(f"Error: {e}")
-            return jsonify({"message": "Invalid token"}), 401
-
-    return decorated_function
 
 
 def create_app():
@@ -60,7 +39,6 @@ def create_app():
                 print(f"Device {device_id} has disconnected.")  # For debugging
                 break
 
-    @authenticate
     @app.route('/api/status', methods=['GET'])
     def get_status():
         return jsonify(server.status)
