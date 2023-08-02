@@ -128,6 +128,17 @@ added to the list of connections).
 I have created a symbolic link between the root .env file and the .env files in the different sub folders 
 so I only have to change one file. (used this command: `mklink .env ..\.env`)
 
+To test the .env file locally, use:
+```
+REACT_APP_URL=http://localhost:5000
+```
+
+To deploy it on AWS, use: 
+```
+REACT_APP_URL=http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com
+```
+
+
 ```
 fov-cameras-web-app
 ├─ .gitignore
