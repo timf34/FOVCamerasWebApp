@@ -107,11 +107,11 @@ class VideoRecorder:
             return "./videos/"
         elif self.debug is False:
             ip_address = get_ip_address()
-            video_dir_path = f"/home/fov/Desktop/videos/{self.today.strftime('%m_%d_%Y@')}_{self.jetson_name}_{ip_address}"
+            video_dir_path = f"/home/fov/Desktop/videos/marvel/{self.jetson_name}/{self.today.strftime('%d_%m_%Y')}/{self.today.strftime('%m_%d_%Y@')}_{self.jetson_name}_{ip_address}"
             check_and_create_dir(video_dir_path)
             return video_dir_path
         else:
-            return "../tim/bohsVids/test"
+            return "/home/fov/Desktop/videos/test"
 
     def record_video(self, video_length_mins: float, video_path: str) -> None:
         """
