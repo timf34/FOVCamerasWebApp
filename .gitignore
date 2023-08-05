@@ -44,3 +44,4 @@ jetson/jetson_simulator.py
 .idea
 
 /jetson/videos
+server/no_auth_aws.zip
