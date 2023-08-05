@@ -6,23 +6,26 @@ import time
 from datetime import datetime
 from typing import Tuple
 
-from config import BohsConfig
+from config import AFLConfig
 from utils.fps import FPS
 from utils.logger import Logger
 from utils.utility_funcs import get_ip_address, check_and_create_dir, get_log_file_path
 
 from config import *
 
+DEBUG: bool = False
 
+# TODO: why is the FPS 5 here?
 class VideoRecorder:
-    def __init__(self, debug: bool = False, width: int = 1280, height: int = 720):
+    def __init__(self, debug: bool = False, width: int = 1280, height: int = 720, fps: int = 5):
         self.debug: bool = debug
-        self.conf: BohsConfig = BohsConfig()
+        self.conf: AFLConfig =AFLConfig()
+        self.fps: int = 5
         self.width: int = width
         self.height: int = height
         self.frame_size: Tuple[int, int] = (self.width, self.height)
         self.today: datetime = datetime.now()
-        self.jetson_name: str = self.conf.jetson_name[-1]  # The final character of the jetson name (i.e. jetson1 -> 1)
+        self.jetson_name: str = self.conf.jetson_name  
         self.log_file_path: str = get_log_file_path(jetson_name=self.conf.jetson_name)
         self.logger: Logger = Logger(
             log_file_path=self.log_file_path,
@@ -74,7 +77,7 @@ class VideoRecorder:
         """Create a video writer object"""
         return cv2.VideoWriter(video_name,
                                cv2.VideoWriter_fourcc(*'MJPG'),
-                               5, self.frame_size)
+                               self.fps, self.frame_size)
 
     @staticmethod
     def create_datetime_video_name() -> str:
@@ -104,7 +107,7 @@ class VideoRecorder:
             return "./videos/"
         elif self.debug is False:
             ip_address = get_ip_address()
-            video_dir_path = f"../tim/bohsVids/{self.today.strftime('%m_%d_%Y@')}_{self.jetson_name}_{ip_address}"
+            video_dir_path = f"/home/fov/Desktop/videos/{self.today.strftime('%m_%d_%Y@')}_{self.jetson_name}_{ip_address}"
             check_and_create_dir(video_dir_path)
             return video_dir_path
         else:
@@ -185,15 +188,12 @@ class VideoRecorder:
         seconds_till_match = self.get_seconds_till_match()
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
-        for i in range(5):
-            if (i == 2) or (i > 5):
-                self.record_video(video_length_mins=10, video_path=path)
-            else:
-                self.record_video(video_length_mins=22.5, video_path=path)
+        for i in range(6):
+            self.record_video(video_length_mins=30, video_path=path)
 
 
 def main():
-    video_recorder = VideoRecorder(debug=True)
+    video_recorder = VideoRecorder(debug=DEBUG)
     video_recorder.record_full_match_in_batches()
 
 
