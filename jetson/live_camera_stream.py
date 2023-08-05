@@ -1,5 +1,6 @@
 import cv2
 import os
+import sys
 import requests
 import time
 from utils.utility_funcs import load_env
@@ -31,8 +32,9 @@ while True:
         print("Failed to read frame.")
         break
 
-    # Encode the frame as JPEG
+    frame = cv2.resize(frame, (1920, 1080))  # Resize frame to FHD
     ret, jpeg = cv2.imencode('.jpg', frame)
+    data = jpeg.tobytes()
 
     if not ret:
         print("Failed to encode frame.")
@@ -45,7 +47,8 @@ while True:
 
     # Send the JPEG image to the server
     start_time = time.time()
-    response = requests.post(f'{URL}/api/image', data=jpeg.tobytes(), headers={'content-type': 'image/jpeg'})
+
+    response = requests.post(f'{URL}/api/image', data=data, headers={'content-type': 'image/jpeg'})
     end_time = time.time()
     print("Time taken to send frame: ", end_time - start_time)
 
