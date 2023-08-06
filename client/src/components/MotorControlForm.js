@@ -23,6 +23,7 @@ export default function MotorControlForm() {
         // TODO: add a warning and fix to say that the input has to be between 100 and 0 if the percentage is selected
         if (mode === 'percentage') {
 
+            // TODO: Tony was getting weird error here
             if (steps > 100 || steps < 0) {
                 const error = 'Percentage should be between 0 and 100';
                 console.error(error);

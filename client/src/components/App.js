@@ -8,6 +8,8 @@ import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
 import DeviceSelection from "./DeviceSelection";
+import RecordVideoForm from './StartStopRecordVideo';
+import SyncS3Form from "./StartStopS3Sync"
 import { StreamProvider } from './StreamContext';
 import '../stylesheets/App.css'
 
@@ -68,6 +70,22 @@ export default function App() {
 
           <div className='component-container'>
             <MotorPositions />
+          </div>
+
+          <div className='component-container'>
+            <h3><u>Record Video</u></h3>
+          </div>
+
+          <div className='component-container'>
+            <RecordVideoForm />
+          </div>
+
+          <div className='component-container'>
+            <h3><u>S3 Sync</u></h3>
+          </div>
+
+          <div className='component-container'>
+            <SyncS3Form />
           </div>
         </div>
       </div>
