@@ -6,7 +6,7 @@
 SERVICE_FILE_PATH="/etc/systemd/system/jetson_simulator.service"
 
 # Define the user
-USER_NAME="timf34"
+USER_NAME="fov"
 
 # Define the python script path
 PYTHON_SCRIPT_PATH="/home/$USER_NAME/Desktop/FOVCamerasWebApp/jetson/jetson_simulator.py"
