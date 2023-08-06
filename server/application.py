@@ -197,29 +197,22 @@ def create_app():
 
     @app.route('/api/image', methods=['GET'])
     def get_image():
-        start_time = time()
         image_data = server.stream_manager.get_image()
 
         if image_data is None:
             return 'No image available', 404
 
-        print("Elapsed time for get_image: ", time() - start_time)
         return Response(image_data, mimetype='image/jpeg')
 
     @app.route('/api/image', methods=['POST'])
     def new_streaming_method():
-        start_time = time()
         nparr = np.fromstring(request.data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-        print("new_streaming_method")
-        print("Image shape: ", img.shape)
 
         _, img_encoded = cv2.imencode('.jpg', img)
         image_data = img_encoded.tobytes()
 
         server.stream_manager.update_image(image_data)
-        print("Elapsed time for new_streaming_method: ", time() - start_time)
 
         return '', 200
 
