@@ -10,6 +10,7 @@ import MotorPositions from './MotorPositions';
 import DeviceSelection from "./DeviceSelection";
 import RecordVideoForm from './StartStopRecordVideo';
 import SyncS3Form from "./StartStopS3Sync"
+import TimeTillMatch from "./TimeTillMatch"
 import { StreamProvider } from './StreamContext';
 import '../stylesheets/App.css'
 
@@ -78,6 +79,10 @@ export default function App() {
 
           <div className='component-container'>
             <RecordVideoForm />
+          </div>
+
+          <div className='component-container'>
+            <TimeTillMatch />
           </div>
 
           <div className='component-container'>

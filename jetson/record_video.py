@@ -1,19 +1,40 @@
 import cv2
 import datetime
 import os
+import requests
 import time
 
 from datetime import datetime
+from requests.exceptions import Timeout
 from typing import Tuple
 
 from config import AFLConfig
 from utils.fps import FPS
 from utils.logger import Logger
-from utils.utility_funcs import get_ip_address, check_and_create_dir, get_log_file_path
+from utils.utility_funcs import get_ip_address, check_and_create_dir, get_log_file_path, load_env
 
 from config import *
 
+# Load environment variables
+load_env()
+URL = os.environ.get('REACT_APP_URL')
+
 DEBUG: bool = False
+
+class ServerRequest:
+    @staticmethod
+    def post(data):
+        try:
+            print(URL)
+            response = requests.post(f"{URL}/api/time-till-match", json=data, timeout=3)
+            # Check the server's response
+            if response.status_code != 200:
+                raise ValueError(f"Error from server: {response.text}")
+            print("Response from server: ", response.text)
+        except Timeout:
+            print("Request timed out ")
+        except Exception as e:
+            print(f"Error in ServerRequest for sending time till match: {e}")
 
 # TODO: why is the FPS 5 here?
 class VideoRecorder:
@@ -186,10 +207,18 @@ class VideoRecorder:
         check_and_create_dir(path)
 
         seconds_till_match = self.get_seconds_till_match()
+        device_name = os.getenv("DEVICE_NAME", "jetson1")
+        data = {
+            "deviceId": device_name,
+            "time_till_match_starts": seconds_till_match
+        }
+        ServerRequest.post(data)
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
         for i in range(6):
             self.record_video(video_length_mins=30, video_path=path)
+            if self.debug is True and i == 0: 
+                break 
 
 
 def main():

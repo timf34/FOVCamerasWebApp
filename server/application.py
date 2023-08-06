@@ -14,6 +14,7 @@ from time import time
 socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet', cors_allowed_origins="*")
 
 last_received_motor_positions = {}
+last_received_time_till_match = {}
 
 
 def create_app():
@@ -245,6 +246,30 @@ def create_app():
         else:
             return jsonify(
                 {"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
+    
+    @app.route('/api/time-till-match', methods=['POST'])
+    def get_time_till_match():
+        global last_received_time_till_match
+        try:
+            data = request.get_json()
+            if not data or 'deviceId' not in data:
+                raise ValueError("Invalid request data")
+            deviceId = data['deviceId']
+            print("Time till match: \n", data)
+            last_received_time_till_match[deviceId] = data  # save data for this device
+            return jsonify(data), 200
+        except Exception as e:
+            print(f"Error in get_time_till_match: {e}")
+            return jsonify({"status": "failure", "message": str(e)}), 400
+
+    @app.route('/api/get-time-till-match/<device_id>', methods=['GET'])
+    def send_time_till_match(device_id):
+        global last_received_time_till_match
+        if device_id in last_received_time_till_match:
+            return jsonify(last_received_time_till_match[device_id]), 200
+        else:
+            return jsonify(
+                {"status": "failure", "message": f"No time till match data received yet for device {device_id}"}), 400
 
     @socketio.on('frame')
     def handle_frame(data):
