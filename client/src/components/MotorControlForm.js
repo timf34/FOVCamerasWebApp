@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import { auth } from './firebase';
 import {useForm} from "./useForm";
 import DeviceContext from "./DeviceContext";
 
@@ -16,19 +15,6 @@ export default function MotorControlForm() {
     const maxSteps = { "f,": 9353, "i,": 75, "z,": 4073 };
 
     const moveMotor = async () => {
-        if (!auth.currentUser) {
-            const error = 'User not logged in';
-            console.error(error);
-            setErrorMessage(error);
-            return;
-        }
-        else {
-            console.log('User logged in:', auth.currentUser.email);
-        }
-
-        const token = await auth.currentUser.getIdToken();
-
-        console.log('Token:', token);
         console.log('Device ID:', deviceId);
 
         // Calculate the steps or percentage depending on the selection
@@ -37,6 +23,7 @@ export default function MotorControlForm() {
         // TODO: add a warning and fix to say that the input has to be between 100 and 0 if the percentage is selected
         if (mode === 'percentage') {
 
+            // TODO: Tony was getting weird error here
             if (steps > 100 || steps < 0) {
                 const error = 'Percentage should be between 0 and 100';
                 console.error(error);
@@ -51,8 +38,7 @@ export default function MotorControlForm() {
         const response = await fetch(`${process.env.REACT_APP_URL}/api/send-input`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ deviceId, input: axis + calculatedSteps })
         });

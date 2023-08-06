@@ -5,13 +5,13 @@ For storing the time of the match + IP addresses too potentially.
 import os
 
 
-class BohsConfig:
+class AFLConfig:
     def __init__(self):
 
         if os.name == 'nt':
             self.jetson_name: str = "jetson1"  # If we're on windows, just assume we're on jetson1
         else:
-            self.jetson_name: str = os.environ.get('JETSON_NAME')
+            self.jetson_name: str = os.environ.get('DEVICE_NAME')
 
         self.jetson_number: str = self.jetson_name[-1]
         self.hour: int = 17

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import {useForm} from "./useForm";
 import DeviceContext from "./DeviceContext";
 
-export default function CameraControlForm() {
+export default function RecordVideoForm() {
   const [values, handleChange] = useForm({
     action: 'start',
   });
@@ -12,7 +12,7 @@ export default function CameraControlForm() {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    const apiUrl = action === 'start' ? `${process.env.REACT_APP_URL}/api/start-camera` : `${process.env.REACT_APP_URL}/api/stop-camera`;
+    const apiUrl = action === 'start' ? `${process.env.REACT_APP_URL}/api/start-record-video` : `${process.env.REACT_APP_URL}/api/stop-record-video`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -36,8 +36,8 @@ export default function CameraControlForm() {
       <label>
         Select action:
         <select name="action" value={action} onChange={handleChange}>
-          <option value="start">Start Camera Control</option>
-          <option value="stop">Stop Camera Control</option>
+          <option value="start">Start Record Video</option>
+          <option value="stop">Stop Record Video</option>
         </select>
       </label>
       <button type="submit">Submit</button>

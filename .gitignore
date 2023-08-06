@@ -44,3 +44,6 @@ jetson/jetson_simulator.py
 .idea
 
 /jetson/videos
+server/no_auth_aws.zip
+server/aws_zips/streaming_works_on_aws/
+jetson/logs/laptop/

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import Login from './Login';
 import StatusList from './StatusList';
 import useStatus from './useStatus';
-import useAuth from './useAuth';
 import CommandButton from './useSendCommand';
 import ServerImage from './ServerImage';
 import MotorControlForm from './MotorControlForm';
@@ -10,6 +8,8 @@ import StartCameraControlButton from './StartStopCameraControl';
 import CameraStreamForm from './StartStopCameraStream';
 import MotorPositions from './MotorPositions';
 import DeviceSelection from "./DeviceSelection";
+import RecordVideoForm from './StartStopRecordVideo';
+import SyncS3Form from "./StartStopS3Sync"
 import { StreamProvider } from './StreamContext';
 import '../stylesheets/App.css'
 
@@ -18,15 +18,9 @@ export default function App() {
   const [isStreaming, setStreaming] = useState(false);
 
   const status = useStatus(useFirebase);
-  const { user, email, setEmail, password, setPassword, errorMessage, handleLogin } = useAuth();
-
-  // console.log("status:", status);
 
   return (
-    <div className="App">
-      {!user ? (
-        <Login email={email} setEmail={setEmail} password={password} setPassword={setPassword} errorMessage={errorMessage} handleLogin={handleLogin} />
-      ) : (
+      <div className="App">
         <div>
           <div className='component-container'>
             <h3><u>Device Diagnostics</u></h3>
@@ -77,8 +71,23 @@ export default function App() {
           <div className='component-container'>
             <MotorPositions />
           </div>
+
+          <div className='component-container'>
+            <h3><u>Record Video</u></h3>
+          </div>
+
+          <div className='component-container'>
+            <RecordVideoForm />
+          </div>
+
+          <div className='component-container'>
+            <h3><u>S3 Sync</u></h3>
+          </div>
+
+          <div className='component-container'>
+            <SyncS3Form />
+          </div>
         </div>
-      )}
-    </div>
+      </div>
   );
 }

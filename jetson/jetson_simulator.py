@@ -165,6 +165,52 @@ class NamespaceHandler(Client):
             self.process["start_camera_stream"].wait()
             if os.path.exists(self.pid_file_path):
                 os.remove(self.pid_file_path)
+    
+    def on_start_record_video(self) -> None:
+        print('Received start record video command')
+        if "start_record_video" not in self.process or self.process["start_record_video"].poll() is not None:
+            self.process["start_record_video"] = subprocess.Popen(['python3', './record_video.py'], stdin=subprocess.PIPE)
+            time.sleep(1)
+            if self.process["start_record_video"].poll() is not None:
+                print('Failed to start process')
+                return
+            else:
+                print('Process started successfully')
+            with open(self.pid_file_path, 'w') as pid_file:
+                pid_file.write(str(self.process["start_record_video"].pid))
+
+    def on_stop_camera_stream(self) -> None:
+        print('Received stop record video command')
+        if "start_record_video" in self.process and self.process["start_record_video"].poll() is None:
+            self.process["start_record_video"].terminate()
+            self.process["start_record_video"].wait()
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)
+    
+    def on_start_s3_sync(self) -> None:
+        print('Received start s3_sync command')
+        if "start_s3_sync" not in self.process or self.process["start_s3_sync"].poll() is not None:
+            self.process["start_s3_sync"] = subprocess.Popen(['python3', './sync_videos_to_s3.py'], stdin=subprocess.PIPE)
+            time.sleep(1)
+            if self.process["start_s3_sync"].poll() is not None:
+                print('Failed to start process')
+                return
+            else:
+                print('Process started successfully')
+            with open(self.pid_file_path, 'w') as pid_file:
+                pid_file.write(str(self.process["start_s3_sync"].pid))
+
+    def on_stop_s3_sync(self) -> None:
+        print('Received stop s3_sync command')
+        print("Self.process: ", self.process)
+        print("self.process poll", self.process["start_s3_sync"].poll())
+        if "start_s3_sync" in self.process and self.process["start_s3_sync"].poll() is None:
+            self.process["start_s3_sync"].terminate()
+            self.process["start_s3_sync"].wait()
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)
+        print("self.process", self.process)
+    
   
 
 # Device ID as a command line argument
@@ -190,8 +236,10 @@ sio.on('stop_camera_control', sio.on_stop_camera_control)
 sio.on('send_input', sio.on_send_input)
 sio.on('start_camera_stream', sio.on_start_camera_stream)
 sio.on('stop_camera_stream', sio.on_stop_camera_stream)
-sio.on('start_record_video_script', sio.on_start_record_video)
-sio.on('stop_record_video_script', sio.on_stop_record_video)
+sio.on('start_record_video', sio.on_start_record_video)
+sio.on('stop_record_video', sio.on_stop_record_video)
+sio.on('start_s3_sync', sio.on_start_s3_sync)
+sio.on('stop_s3_sync', sio.on_stop_s3_sync)
 sio.on('start_high_computation', sio.on_start_high_computation)
 sio.on('stop_high_computation', sio.on_stop_high_computation)
 

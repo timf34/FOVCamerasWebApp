@@ -1,6 +1,7 @@
 ## Deploying to AWS EB 
 
-1. Build ReactJS client 
+1. Build ReactJS client
+    - `cd client`
     - `npm run build`
 1. Move build folder to server folder
     - `mv build/ server/`
