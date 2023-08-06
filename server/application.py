@@ -149,6 +149,50 @@ def create_app():
             return jsonify({"message": "Camera stream stop command sent"}), 200
         else:
             return jsonify({"message": "Device not connected"}), 400
+    
+    @app.route('/api/start-record-video', methods=['POST'])
+    def handle_start_record_video():
+        print("Start record video")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('start_record_video', room=server.connections[deviceId])
+            return jsonify({"message": "Record video start command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
+    @app.route('/api/stop-record-video', methods=['POST'])
+    def handle_stop_record_video():
+        print("Stop record video")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('stop_record_video', room=server.connections[deviceId])
+            return jsonify({"message": "Record video stop command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+        
+    @app.route('/api/start-s3-sync', methods=['POST'])
+    def handle_start_s3_sync():
+        print("Start s3_sync")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('start_s3_sync', room=server.connections[deviceId])
+            return jsonify({"message": "Record video start command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
+
+    @app.route('/api/stop-s3-sync', methods=['POST'])
+    def handle_stop_s3_sync():
+        print("Stop s3_sync")
+        data = request.get_json()
+        deviceId = data['deviceId']
+        if deviceId in server.connections:
+            socketio.emit('stop_s3_sync', room=server.connections[deviceId])
+            return jsonify({"message": "Record video stop command sent"}), 200
+        else:
+            return jsonify({"message": "Device not connected"}), 400
 
     @app.route('/api/image', methods=['GET'])
     def get_image():
