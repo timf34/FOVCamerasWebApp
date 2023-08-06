@@ -20,6 +20,7 @@ else:
 while True:
     # Read a frame from the camera
     print("Reading frame...")
+    ret, frame = cap.read()
 
     if not ret:
         print("Failed to read frame.")
