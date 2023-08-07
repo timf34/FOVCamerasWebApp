@@ -16,7 +16,7 @@ class AFLConfig:
 
         self.jetson_number: str = self.jetson_name[-1]
         self.hour: int = 14
-        self.minute: int = 20
+        self.minute: int = 46
         self.second: int = 2
         self.microsecond: int = 1
 
