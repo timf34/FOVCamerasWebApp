@@ -38,10 +38,10 @@ class ServerRequest:
 
 # TODO: why is the FPS 5 here?
 class VideoRecorder:
-    def __init__(self, debug: bool = False, width: int = 1280, height: int = 720, fps: int = 5):
+    def __init__(self, debug: bool = False, width: int = 1920, height: int = 1080, fps: int = 5):
         self.debug: bool = debug
         self.conf: AFLConfig =AFLConfig()
-        self.fps: int = 5
+        self.fps: int = 60
         self.width: int = width
         self.height: int = height
         self.frame_size: Tuple[int, int] = (self.width, self.height)
@@ -128,7 +128,7 @@ class VideoRecorder:
             return "./videos/"
         elif self.debug is False:
             ip_address = get_ip_address()
-            video_dir_path = f"/home/fov/Desktop/videos/marvel/{self.jetson_name}/{self.today.strftime('%d_%m_%Y')}/{self.today.strftime('%m_%d_%Y@')}_{self.jetson_name}_{ip_address}"
+            video_dir_path = f"/home/fov/Desktop/videos/marvel/{self.jetson_name}/{self.today.strftime('%d_%m_%Y')}"
             check_and_create_dir(video_dir_path)
             return video_dir_path
         else:
@@ -147,7 +147,6 @@ class VideoRecorder:
         video_path = os.path.join(video_path, video_name) # Join the path and the name together
 
         writer = self.create_video_writer(video_name=video_path)
-        avg_fps, reading_fps, writing_fps, bohs_fps = self.initialize_fps_timers()
         frame_counter = 0
         timeout = self.get_timeout(video_length_mins)
 
@@ -155,10 +154,7 @@ class VideoRecorder:
         try:
             if cap.isOpened():
                 while cap.isOpened():
-                    # Read the next frame
-                    reading_fps.start()
                     ret_val, img = cap.read()
-                    reading_fps.stop()
 
                     # Resize the frame to (720, 1280)
                     img = cv2.resize(img, self.frame_size)
@@ -167,10 +163,7 @@ class VideoRecorder:
                         print("Not ret_val. Breaking!")
                         break
 
-                    # Write the frame to the file
-                    writing_fps.start()
                     writer.write(img)
-                    writing_fps.stop()
 
                     frame_counter += 1
 
@@ -178,9 +171,6 @@ class VideoRecorder:
                         print("Timeout reached. Breaking!")
                         raise KeyboardInterrupt
 
-                    self.logger.log(
-                        f"Reading FPS: {reading_fps.fps()} - Writing FPS: {writing_fps.fps()} - Frame: {frame_counter}"
-                    )
             else:
                 print("Camera not opened")
         except KeyboardInterrupt:
