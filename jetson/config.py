@@ -3,6 +3,7 @@ A config file to help speed up match day work.
 For storing the time of the match + IP addresses too potentially.
 """
 import os
+import socket
 
 
 class AFLConfig:
