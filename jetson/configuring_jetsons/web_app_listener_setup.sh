@@ -22,6 +22,7 @@ After=network-online.target
 
 [Service]
 User=$USER_NAME
+Group=$USER_NAME
 WorkingDirectory=$WORKING_DIRECTORY
 ExecStart=/usr/bin/python3 $PYTHON_SCRIPT_PATH $DEVICE_NAME
 Restart=always
