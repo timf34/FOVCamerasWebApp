@@ -41,7 +41,7 @@ class VideoRecorder:
     def __init__(self, debug: bool = False, width: int = 1920, height: int = 1080, fps: int = 5):
         self.debug: bool = debug
         self.conf: AFLConfig =AFLConfig()
-        self.fps: int = 60
+        self.fps: int = 30
         self.width: int = width
         self.height: int = height
         self.frame_size: Tuple[int, int] = (self.width, self.height)
@@ -88,7 +88,7 @@ class VideoRecorder:
             cv2.VideoCapture(0)
             if os.name == 'nt'
             else cv2.VideoCapture(
-                f'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=1920, height=1080, format=NV12, framerate=60/1 ! '
+                f'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=1920, height=1080, format=NV12, framerate=30/1 ! '
                 f'nvvidconv ! video/x-raw, width={str(self.width)}, height={str(self.height)}, format=BGRx ! '
                 f'videoconvert ! video/x-raw, format=BGR ! appsink'
             )
@@ -156,7 +156,7 @@ class VideoRecorder:
                 while cap.isOpened():
                     ret_val, img = cap.read()
 
-                    # Resize the frame to (720, 1280)
+                    # Resize the frame 
                     img = cv2.resize(img, self.frame_size)
 
                     if not ret_val:
