@@ -26,7 +26,7 @@ if os.name == 'nt':
 else:
     cap = cv2.VideoCapture(
         f'nvarguscamerasrc !  video/x-raw(memory:NVMM), width=1920, height=1080, format=NV12, framerate=60/1 ! '
-        f'nvvidconv ! video/x-raw, width={str(640)}, height={str(640)}, format=BGRx ! '
+        f'nvvidconv ! video/x-raw, width={str(1920)}, height={str(1080)}, format=BGRx ! '
         f'videoconvert ! video/x-raw, format=BGR ! appsink'
     )
 
