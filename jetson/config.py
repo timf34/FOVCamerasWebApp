@@ -15,8 +15,8 @@ class AFLConfig:
             self.jetson_name: str = os.environ.get('DEVICE_NAME', socket.gethostname().lower())
 
         self.jetson_number: str = self.jetson_name[-1]
-        self.hour: int = 16
-        self.minute: int = 30
+        self.hour: int = 17
+        self.minute: int = 15
         self.second: int = 2
         self.microsecond: int = 1
 
