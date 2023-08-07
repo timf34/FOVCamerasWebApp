@@ -2,7 +2,20 @@ import cv2
 import os
 import sys
 import requests
+import signal
 from utils.utility_funcs import load_env
+
+# Function to handle cleanup
+def clean_up(signal_received, frame):
+    global cap
+    print("Signal received. Closing resources...")
+    cap.release()
+    cv2.destroyAllWindows()
+    sys.exit(0)
+
+# Register signals to be caught
+signal.signal(signal.SIGINT, clean_up)   # Signal 2 (CTRL+C)
+signal.signal(signal.SIGTERM, clean_up)  # Signal 15 (terminate)
 
 load_env()
 URL = os.environ.get('REACT_APP_URL')
@@ -45,3 +58,7 @@ while True:
         print("Failed to send frame.")
         print("Response code: ", response.status_code)
         break
+
+# Clean up resources if the loop ends naturally
+cap.release()
+cv2.destroyAllWindows()
