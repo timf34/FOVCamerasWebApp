@@ -215,8 +215,8 @@ class VideoRecorder:
         ServerRequest.post(data)
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
-        for i in range(6):
-            self.record_video(video_length_mins=30, video_path=path)
+        for i in range(3):
+            self.record_video(video_length_mins=1, video_path=path)
             if self.debug is True and i == 0: 
                 break 
 
