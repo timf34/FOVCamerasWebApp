@@ -39,7 +39,7 @@ SHDN = 16
 
 # Motor Speeds  DO NOT EXCEED!
 F_SPEED = 800
-I_SPEED = 90
+I_SPEED = 30
 Z_SPEED = 800
 
 # Function to simulate GPIO operations
@@ -76,26 +76,42 @@ class Motor:
         GPIO.output(self.dir_pin, GPIO.HIGH if direction == "clockwise" else GPIO.LOW)
 
         # Activate sleep pin
-        GPIO.output(self.sleep_pin, GPIO.HIGH)
-        GPIO.output(self.shdn, GPIO.HIGH)
-        time.sleep(0.1)  # Delay before motor movement
+        self._activate_sleep()
 
         # Rotate the motor
         if not SIMULATION_MODE:
             for i in range(1, steps + 1):
-                # Calculate acceleration
-                acceleration_factor = min(i, 10)  # We only increment speed for the first 10 steps
-                effective_speed = self.speed * (acceleration_factor / 10)
-
+                effective_speed = self._calculate_speed(i)
+                
                 # Move motor
-                GPIO.output(self.step_pin, GPIO.HIGH)
-                time.sleep(1 / effective_speed)
-                GPIO.output(self.step_pin, GPIO.LOW)
-                time.sleep(1 / effective_speed)
+                self._move_motor(effective_speed)
 
         # Deactivate sleep pin
+        self._deactivate_sleep()
+
+    def _activate_sleep(self):
+        GPIO.output(self.sleep_pin, GPIO.HIGH)
+        GPIO.output(self.shdn, GPIO.HIGH)
+        time.sleep(0.1)  # Delay before motor movement
+
+    def _deactivate_sleep(self):
         GPIO.output(self.sleep_pin, GPIO.LOW)
         GPIO.output(self.shdn, GPIO.LOW)
+
+    def _calculate_speed(self, step_number):
+        if self.step_pin == I_STEP_PIN:
+            return self.speed
+        else:
+            # Calculate acceleration
+            acceleration_factor = min(step_number, 10)  # We only increment speed for the first 10 steps
+            return self.speed * (acceleration_factor / 10)
+
+    def _move_motor(self, effective_speed):
+        GPIO.output(self.step_pin, GPIO.HIGH)
+        time.sleep(1 / effective_speed)
+        GPIO.output(self.step_pin, GPIO.LOW)
+        time.sleep(1 / effective_speed)
+
 
     def move(self, target_position):
         steps = int(target_position - self.position)
