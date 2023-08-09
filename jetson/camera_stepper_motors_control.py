@@ -23,13 +23,13 @@ except ImportError:
 
 
 # Pin Definitions
-F_STEP_PIN = 15
-F_DIR_PIN = 12
-F_SLEEP_PIN = 7
+I_STEP_PIN = 15
+I_DIR_PIN = 12
+I_SLEEP_PIN = 7
 
-I_STEP_PIN = 37
-I_DIR_PIN = 13
-I_SLEEP_PIN = 35
+F_STEP_PIN = 37
+F_DIR_PIN = 13
+F_SLEEP_PIN = 35
 
 Z_STEP_PIN = 21
 Z_DIR_PIN = 23
