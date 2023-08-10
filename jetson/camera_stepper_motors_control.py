@@ -191,60 +191,62 @@ class MotorPositionFile:
             print(f"Error in save_motor_positions: {e}")
 
 
+
 # Main program
 if __name__ == "__main__":
-    # Setup GPIO
-    motor_controller = MotorController(
-        f_motor=Motor(F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN, F_SPEED, SHDN),
-        i_motor=Motor(I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN, I_SPEED, SHDN),
-        z_motor=Motor(Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN, Z_SPEED, SHDN),
-        shdn=SHDN
-    )
-    motor_controller.setup()
+    try:
+        # Setup GPIO
+        motor_controller = MotorController(
+            f_motor=Motor(F_STEP_PIN, F_DIR_PIN, F_SLEEP_PIN, F_SPEED, SHDN),
+            i_motor=Motor(I_STEP_PIN, I_DIR_PIN, I_SLEEP_PIN, I_SPEED, SHDN),
+            z_motor=Motor(Z_STEP_PIN, Z_DIR_PIN, Z_SLEEP_PIN, Z_SPEED, SHDN),
+            shdn=SHDN
+        )
+        motor_controller.setup()
 
-    # Load motor positions from the file
-    positions_file = MotorPositionFile()
-    f_position, i_position, z_position = positions_file.load()
-    motor_controller.f_motor.position = f_position
-    motor_controller.i_motor.position = i_position
-    motor_controller.z_motor.position = z_position
+        # Load motor positions from the file
+        positions_file = MotorPositionFile()
+        f_position, i_position, z_position = positions_file.load()
+        motor_controller.f_motor.position = f_position
+        motor_controller.i_motor.position = i_position
+        motor_controller.z_motor.position = z_position
 
-    # Save motor positions on setup
-    positions_file.save(f_position, i_position, z_position)
+        # Save motor positions on setup
+        positions_file.save(f_position, i_position, z_position)
 
-    # Main loop
-    while True:
-        print("F Motor Position:", motor_controller.f_motor.position)
-        print("I Motor Position:", motor_controller.i_motor.position)
-        print("Z Motor Position:", motor_controller.z_motor.position)
-        print("F Motor %:", (motor_controller.z_motor.position / 69))  # Find out what the proper percentage ratio is here!
-        print("I Motor %:", (i_position))
-        print("Z Motor %:", (z_position))
+        # Main loop
+        while True:
+            print("F Motor Position:", motor_controller.f_motor.position)
+            print("I Motor Position:", motor_controller.i_motor.position)
+            print("Z Motor Position:", motor_controller.z_motor.position)
+            print("F Motor %:", (motor_controller.z_motor.position / 69))  # Find out what the proper percentage ratio is here!
+            print("I Motor %:", (i_position))
+            print("Z Motor %:", (z_position))
 
-        GPIO.output([motor_controller.f_motor.sleep_pin, motor_controller.i_motor.sleep_pin, motor_controller.z_motor.sleep_pin], GPIO.LOW)
+            GPIO.output([motor_controller.f_motor.sleep_pin, motor_controller.i_motor.sleep_pin, motor_controller.z_motor.sleep_pin], GPIO.LOW)
 
-        # Terminal input for motor coordinate and axis
-        # Note: enter it in steps!
-        print("Enter axis (f, i, z) and motor steps separated by a comma (i.e. f, 50); press q to quit:")
-        motor_input = sys.stdin.readline().strip()
+            # Terminal input for motor coordinate and axis
+            # Note: enter it in steps!
+            print("Enter axis (f, i, z) and motor steps separated by a comma (i.e. f, 50); press q to quit:")
+            motor_input = sys.stdin.readline().strip()
 
-        if motor_input == "q":
-            # Save motor positions before quitting
+            if motor_input == "q":
+                # Save motor positions before quitting
+                positions_file.save(motor_controller.f_motor.position, motor_controller.i_motor.position, motor_controller.z_motor.position)
+                break
+
+            axis, target_coord = motor_input.split(',')
+            target_position = int(target_coord)
+
+            if axis == "f":
+                motor_controller.f_motor.move(target_position)
+            elif axis == "i":
+                motor_controller.i_motor.move(target_position)
+            elif axis == "z":
+                motor_controller.z_motor.move(target_position)
+            else:
+                print("Invalid motor axis. Please try again.")
+
             positions_file.save(motor_controller.f_motor.position, motor_controller.i_motor.position, motor_controller.z_motor.position)
-            break
-
-        axis, target_coord = motor_input.split(',')
-        target_position = int(target_coord)
-
-        if axis == "f":
-            motor_controller.f_motor.move(target_position)
-        elif axis == "i":
-            motor_controller.i_motor.move(target_position)
-        elif axis == "z":
-            motor_controller.z_motor.move(target_position)
-        else:
-            print("Invalid motor axis. Please try again.")
-
-        positions_file.save(motor_controller.f_motor.position, motor_controller.i_motor.position, motor_controller.z_motor.position)
-
-    motor_controller.cleanup()
+    finally:
+        motor_controller.cleanup()
