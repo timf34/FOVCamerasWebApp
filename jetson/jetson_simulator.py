@@ -92,29 +92,6 @@ class NamespaceHandler(Client):
             if os.path.exists(self.pid_file_path):
                 os.remove(self.pid_file_path)
 
-    def on_start_high_computation(self) -> None:
-        # TODO: use a local variable for the "start_high_computation" string
-        print('Received start camera control command')
-        if "start_high_computation" not in self.process or self.process["start_high_computation"].poll() is not None:
-            self.process["start_high_computation"] = subprocess.Popen(['python3', './high_power_torch_script.py'], stdin=subprocess.PIPE)
-            time.sleep(1)
-            if self.process["start_high_computation"].poll() is not None:
-                print('Failed to start process')
-                return
-            else:
-                print('Process started successfully')
-            with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process["start_high_computation"].pid))
-
-    def on_stop_high_computation(self) -> None:
-        print('Received stop camera control command')
-        start_high_computation = "start_high_computation"
-        if start_high_computation in self.process and self.process[start_high_computation].poll() is None:
-            self.process[start_high_computation].terminate()
-            self.process[start_high_computation  ].wait()
-            if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)
-
     def on_start_record_video(self) -> None:
         print('Received start record_video command')
         if "start_record_video" not in self.process or self.process["start_record_video"].poll() is not None:
