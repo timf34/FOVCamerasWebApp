@@ -21,7 +21,7 @@ import subprocess
 import sys
 import threading
 from socketio import Client
-from typing import Dict
+from typing import Dict, List
 
 from utils.utility_funcs import load_env
 
@@ -53,7 +53,14 @@ class NamespaceHandler(Client):
         super().__init__()
         self.process: Dict[str, subprocess.Popen] = {}  # key: command, value: subprocess.Popen object
         self.pid_file_path = './camera_control_pid.txt'
-
+        self.commands: Dict[str, List[str]] = {
+            'start_camera_control': ['./camera_stepper_motors_control.py', deviceId],
+            'start_high_computation': ['./high_power_torch_script.py'],
+            'start_record_video': ['./record_video.py'],
+            'start_camera_stream': ['./live_camera_stream.py'],
+            'start_s3_sync': ['./sync_videos_to_s3.py']
+        }
+    
     @staticmethod
     def on_connect() -> None:
         sio.emit('device_id', deviceId)  # Send the device ID to the server; this is called when we reconnect to server
@@ -71,103 +78,61 @@ class NamespaceHandler(Client):
     def on_command(data) -> None:  # This function listens for the 'command' event
         print('Received command:', data)
     
-    def on_start_camera_control(self) -> None:
-        print('Received start camera control command')
-        if "start_camera_control" not in self.process or self.process["start_camera_control"].poll() is not None:
-            self.process["start_camera_control"] = subprocess.Popen(['python3', './camera_stepper_motors_control.py', deviceId], stdin=subprocess.PIPE)
+    def start_command(self, command: str) -> None:
+        print(f'Received {command} command')
+        if command not in self.process or self.process[command].poll() is not None:
+            self.process[command] = subprocess.Popen(['python3'] + self.commands[command], stdin=subprocess.PIPE)
             time.sleep(1)
-            if self.process["start_camera_control"].poll() is not None:
-                print('Failed to start process')
+            if self.process[command].poll() is not None:
+                print(f'Failed to start {command}')
                 return
             else:
-                print('Process started successfully')
+                print(f'{command} started successfully')
             with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process["start_camera_control"].pid))
+                pid_file.write(str(self.process[command].pid))
+
+    def stop_command(self, command: str) -> None:
+        print(f'Received stop {command} command')
+        if command in self.process and self.process[command].poll() is None:
+            self.process[command].terminate()
+            self.process[command].wait()
+            if os.path.exists(self.pid_file_path):
+                os.remove(self.pid_file_path)
+                
+    def on_start_camera_control(self) -> None:
+        self.start_command('start_camera_control')
 
     def on_stop_camera_control(self) -> None:
-        print('Received stop camera control command')
-        if "start_camera_control" in self.process and self.process["start_camera_control"].poll() is None:
-            self.process["start_camera_control"].terminate()
-            self.process["start_camera_control"].wait()
-            if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)
+        self.stop_command('start_camera_control')
 
     def on_start_record_video(self) -> None:
-        print('Received start record_video command')
-        if "start_record_video" not in self.process or self.process["start_record_video"].poll() is not None:
-            self.process["start_record_video"] = subprocess.Popen(['python3', './record_video.py'], stdin=subprocess.PIPE)
-            time.sleep(1)
-            if self.process["start_record_video"].poll() is not None:
-                print('Failed to start process')
-                return
-            else:
-                print('Record video process started successfully')
-            with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process["start_record_video"].pid))
+        self.start_command("start_record_video")
 
     def on_stop_record_video(self) -> None:
-        print('Received stop record_video command')
-        if "start_record_video" in self.process and self.process["start_record_video"].poll() is None:
-            self.process["start_record_video"].terminate()
-            self.process["start_record_video"].wait()
-            if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)
-                print("Removed pid file for record_video")
+        self.stop_command("start_record_video")
 
+    def on_start_camera_stream(self) -> None:
+        self.start_command("start_camera_stream")
+
+    def on_stop_camera_stream(self) -> None:
+        self.stop_command("start_camera_stream")
+    
+    def on_start_s3_sync(self) -> None:
+        self.start_command("start_s3_sync")
+
+    def on_stop_s3_sync(self) -> None:
+       self.stop_command("start_s3_sync")
+
+    # TODO: not entirely sure what this is doing
     def on_send_input(self, data) -> None:
         print('Received input:', data)
         # if process is running, send input to it
         if self.process is not None and self.process["start_camera_control"].poll() is None:
             input_data = data + '\n'  # Add a newline character at the end, because readline() reads until it encounters a newline
-            self.process["start_camera_control"].stdin.write(input_data.encode())  # stdin expects bytes, so encode the string as bytes
+            self.process["start_camera_control"].stdin.write(
+            input_data.encode())  # stdin expects bytes, so encode the string as bytes
             self.process["start_camera_control"].stdin.flush()  # flush the buffer to make sure the data is actually sent to the subprocess
 
-    def on_start_camera_stream(self) -> None:
-        print('Received start camera stream command')
-        if "start_camera_stream" not in self.process or self.process["start_camera_stream"].poll() is not None:
-            self.process["start_camera_stream"] = subprocess.Popen(['python3', './live_camera_stream.py'], stdin=subprocess.PIPE)
-            time.sleep(1)
-            if self.process["start_camera_stream"].poll() is not None:
-                print('Failed to start process')
-                return
-            else:
-                print('Process started successfully')
-            with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process["start_camera_stream"].pid))
-
-    def on_stop_camera_stream(self) -> None:
-        print('Received stop camera stream command')
-        if "start_camera_stream" in self.process and self.process["start_camera_stream"].poll() is None:
-            self.process["start_camera_stream"].terminate()
-            self.process["start_camera_stream"].wait()
-            if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)
-    
-    def on_start_s3_sync(self) -> None:
-        print('Received start s3_sync command')
-        if "start_s3_sync" not in self.process or self.process["start_s3_sync"].poll() is not None:
-            self.process["start_s3_sync"] = subprocess.Popen(['python3', './sync_videos_to_s3.py'], stdin=subprocess.PIPE)
-            time.sleep(1)
-            if self.process["start_s3_sync"].poll() is not None:
-                print('Failed to start process')
-                return
-            else:
-                print('Process started successfully')
-            with open(self.pid_file_path, 'w') as pid_file:
-                pid_file.write(str(self.process["start_s3_sync"].pid))
-
-    def on_stop_s3_sync(self) -> None:
-        print('Received stop s3_sync command')
-        print("Self.process: ", self.process)
-        print("self.process poll", self.process["start_s3_sync"].poll())
-        if "start_s3_sync" in self.process and self.process["start_s3_sync"].poll() is None:
-            self.process["start_s3_sync"].terminate()
-            self.process["start_s3_sync"].wait()
-            if os.path.exists(self.pid_file_path):
-                os.remove(self.pid_file_path)
-        print("self.process", self.process)
-    
-  
 
 # Device ID as a command line argument
 if len(sys.argv) != 2:
