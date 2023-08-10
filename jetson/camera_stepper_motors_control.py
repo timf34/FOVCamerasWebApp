@@ -6,14 +6,24 @@ from requests.exceptions import Timeout
 
 from utils.utility_funcs import load_env
 
-print("yo mamacagain and again")
-
 # Load environment variables
 load_env()
 URL = os.environ.get('REACT_APP_URL')
 
+# Device ID as a command line argument
+if len(sys.argv) != 2:
+    print('Usage: python script.py <device_id>')
+    sys.exit(1)
+
+DEVICE_ID = sys.argv[1]
+# DEVICE_ID = os.environ.get('DEVICE_NAME', "jetson1")
+
+
 # Simulation flag
-SIMULATION_MODE = False
+if os.name == 'nt':
+    SIMULATION_MODE = True
+else:
+    SIMULATION_MODE = False
 
 try:
     import Jetson.GPIO as GPIO
@@ -178,14 +188,13 @@ class MotorPositionFile:
         try:
             with open(self.filename, "w") as file:
                 file.write(f"{f_position},{i_position},{z_position}")
-            # TODO: should raise a warning if the env variable doesn't exist!
-            device_name = os.getenv("DEVICE_NAME", "jetson1")
             data = {
-                "deviceId": device_name,
+                "deviceId": DEVICE_ID,
                 "f_position": f_position,
                 "i_position": i_position,
                 "z_position": z_position
             }
+            print(f"Saving motor positions: {data}")
             ServerRequest.post(data)
         except Exception as e:
             print(f"Error in save_motor_positions: {e}")
