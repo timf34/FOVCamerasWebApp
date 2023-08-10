@@ -133,6 +133,11 @@ To test the .env file locally, use:
 REACT_APP_URL=http://localhost:5000
 ```
 
+or 
+```
+REACT_APP_URL=http://192.168.234.1:5000
+```
+
 To deploy it on AWS, use: 
 ```
 REACT_APP_URL=http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com
