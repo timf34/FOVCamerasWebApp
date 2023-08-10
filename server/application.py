@@ -17,6 +17,17 @@ last_received_motor_positions = {}
 last_received_time_till_match = {}
 
 
+def handle_device_command(event_name, success_message, _server: Server, error_message="Device not connected"):
+    print(f"{event_name} command received")
+    data = request.get_json()
+    deviceId = data['deviceId']
+    if deviceId in _server.connections:
+        socketio.emit(event_name, room=_server.connections[deviceId])
+        return jsonify({"message": success_message}), 200
+    else:
+        return jsonify({"message": error_message}), 400
+
+
 def create_app():
     app = Flask(__name__, static_folder='./build/static', template_folder='./build')
     app.logger.setLevel(logging.INFO)
@@ -58,6 +69,7 @@ def create_app():
         app.logger.info(f"Received data: {server.status[deviceId]}")
         return jsonify({"message": "Data received"}), 200
 
+
     @app.route('/api/command', methods=['POST'])
     def post_command():
         data = request.get_json()
@@ -75,51 +87,39 @@ def create_app():
 
     @app.route('/api/start-camera', methods=['POST'])
     def handle_start_camera_control():
-        print("Start camera control")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_camera_control', room=server.connections[deviceId])
-            return jsonify({"message": "Camera control start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
+        return handle_device_command('start_camera_control', "Camera control start command sent", server=server)
 
     @app.route('/api/stop-camera', methods=['POST'])
     def handle_stop_camera_control():
-        print("Stop camera control")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_camera_control', room=server.connections[deviceId])
-            return jsonify({"message": "Camera control stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
+        return handle_device_command('stop_camera_control', "Camera control stop command sent", server=server)
 
-    @app.route('/api/start-high-computation', methods=['POST'])
-    def handle_start_high_computation():
-        print("Start high computation script")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_high_computation', room=server.connections[deviceId])
-            return jsonify({"message": "High computation start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
+    @app.route('/api/start-camera-stream', methods=['POST'])
+    def handle_start_camera_stream():
+        return handle_device_command('start_camera_stream', "Camera stream start command sent", server=server)
 
-    @app.route('/api/stop-high-computation', methods=['POST'])
-    def handle_stop_high_computation():
-        print("Stop high computation script")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_high_computation', room=server.connections[deviceId])
-            return jsonify({"message": "High computation stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
+    @app.route('/api/stop-camera-stream', methods=['POST'])
+    def handle_stop_camera_stream():
+        return handle_device_command('stop_camera_stream', "Camera stream stop command sent", server=server)
+    
+    @app.route('/api/start-record-video', methods=['POST'])
+    def handle_start_record_video():
+        return handle_device_command('start_record_video', "Record video start command sent", server=server)
 
+    @app.route('/api/stop-record-video', methods=['POST'])
+    def handle_stop_record_video():
+        return handle_device_command('stop_record_video', "Record video stop command sent", server=server)
+        
+    @app.route('/api/start-s3-sync', methods=['POST'])
+    def handle_start_s3_sync():
+        return handle_device_command('start_s3_sync', "Record video start command sent", server=server)
+
+    @app.route('/api/stop-s3-sync', methods=['POST'])
+    def handle_stop_s3_sync():
+        return handle_device_command('stop_s3_sync', "Record video stop command sent", server=server)
+    
+    # TODO: not sure what this func does
     @app.route('/api/send-input', methods=['POST'])
     def handle_send_input():
-        print("Send input to script")
         data = request.get_json()
         deviceId = data['deviceId']
         input_data = data['input']
@@ -129,79 +129,11 @@ def create_app():
         else:
             return jsonify({"message": "Device not connected"}), 400
 
-    @app.route('/api/start-camera-stream', methods=['POST'])
-    def handle_start_camera_stream():
-        print("Start camera stream")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_camera_stream', room=server.connections[deviceId])
-            return jsonify({"message": "Camera stream start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
-    @app.route('/api/stop-camera-stream', methods=['POST'])
-    def handle_stop_camera_stream():
-        print("Stop camera stream")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_camera_stream', room=server.connections[deviceId])
-            return jsonify({"message": "Camera stream stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-    
-    @app.route('/api/start-record-video', methods=['POST'])
-    def handle_start_record_video():
-        print("Start record video")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_record_video', room=server.connections[deviceId])
-            return jsonify({"message": "Record video start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
-    @app.route('/api/stop-record-video', methods=['POST'])
-    def handle_stop_record_video():
-        print("Stop record video")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_record_video', room=server.connections[deviceId])
-            return jsonify({"message": "Record video stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-        
-    @app.route('/api/start-s3-sync', methods=['POST'])
-    def handle_start_s3_sync():
-        print("Start s3_sync")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('start_s3_sync', room=server.connections[deviceId])
-            return jsonify({"message": "Record video start command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
-    @app.route('/api/stop-s3-sync', methods=['POST'])
-    def handle_stop_s3_sync():
-        print("Stop s3_sync")
-        data = request.get_json()
-        deviceId = data['deviceId']
-        if deviceId in server.connections:
-            socketio.emit('stop_s3_sync', room=server.connections[deviceId])
-            return jsonify({"message": "Record video stop command sent"}), 200
-        else:
-            return jsonify({"message": "Device not connected"}), 400
-
     @app.route('/api/image', methods=['GET'])
     def get_image():
         image_data = server.stream_manager.get_image()
-
         if image_data is None:
             return 'No image available', 404
-
         return Response(image_data, mimetype='image/jpeg')
 
     @app.route('/api/image', methods=['POST'])
