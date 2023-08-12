@@ -49,6 +49,12 @@ def get_temperature() -> int:
     # randomly return a number between 0 and 100
     return random.randint(0, 100)
 
+def write_to_text_file(data: str, file_name: str) -> None:
+    try:
+        with open(file_name, 'w') as f:
+            f.write(data)
+    except Exception as e:
+        print(f"Error in write_to_text_file: {e}")
 
 class NamespaceHandler(Client):
     def __init__(self):
@@ -112,6 +118,7 @@ class NamespaceHandler(Client):
 
     def on_stop_record_video(self) -> None:
         self.stop_command("start_record_video")
+        write_to_text_file("Stopped recording", TIME_TILL_MATCH_TXT_FILE)
 
     def on_start_camera_stream(self) -> None:
         self.start_command("start_camera_stream")

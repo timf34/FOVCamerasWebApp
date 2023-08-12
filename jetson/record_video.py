@@ -24,21 +24,13 @@ DEBUG: bool = False
 FPS_CONSTANT: int = 30
 TIME_TILL_MATCH_TXT_FILE: str = "./time_till_match.txt"
 
+def write_to_text_file(data: str, file_name: str) -> None:
+    try:
+        with open(file_name, 'w') as f:
+            f.write(data)
+    except Exception as e:
+        print(f"Error in write_to_text_file: {e}")
 
-class ServerRequest:
-    @staticmethod
-    def post(data):
-        try:
-            print(URL)
-            response = requests.post(f"{URL}/api/time-till-match", json=data, timeout=3)
-            # Check the server's response
-            if response.status_code != 200:
-                raise ValueError(f"Error from server: {response.text}")
-            print("Response from server: ", response.text)
-        except Timeout:
-            print("Request timed out ")
-        except Exception as e:
-            print(f"Error in ServerRequest for sending time till match: {e}")
 
 class VideoRecorder:
     def __init__(self, debug: bool = False, width: int = 1920, height: int = 1080, fps: int = 5):
@@ -202,14 +194,9 @@ class VideoRecorder:
         check_and_create_dir(path)
 
         seconds_till_match = self.get_seconds_till_match()
-        device_name = os.environ.get("DEVICE_NAME", "jetson1")
-        data = {
-            "deviceId": device_name,
-            "time_till_match_starts": seconds_till_match
-        }
-        ServerRequest.post(data)  # Initially send data to web app
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
+        write_to_text_file("Started recording", TIME_TILL_MATCH_TXT_FILE)
         for i in range(3):
             self.record_video(video_length_mins=1, video_path=path)
             if self.debug is True and i == 0: 
