@@ -161,8 +161,6 @@ sio.on('start_record_video', sio.on_start_record_video)
 sio.on('stop_record_video', sio.on_stop_record_video)
 sio.on('start_s3_sync', sio.on_start_s3_sync)
 sio.on('stop_s3_sync', sio.on_stop_s3_sync)
-sio.on('start_high_computation', sio.on_start_high_computation)
-sio.on('stop_high_computation', sio.on_stop_high_computation)
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)  # This is called when the server is running already when we connect
@@ -201,5 +199,3 @@ try:
     sio.wait()
 finally:
     sio.disconnect()
-
-
