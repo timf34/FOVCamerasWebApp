@@ -18,8 +18,12 @@ from config import *
 # Load environment variables
 load_env()
 URL = os.environ.get('REACT_APP_URL')
+DEVICE_ID = os.environ.get('DEVICE_NAME', 'jetson1')
 
 DEBUG: bool = False
+FPS_CONSTANT: int = 30
+TIME_TILL_MATCH_TXT_FILE: str = "./time_till_match.txt"
+
 
 class ServerRequest:
     @staticmethod
@@ -36,12 +40,11 @@ class ServerRequest:
         except Exception as e:
             print(f"Error in ServerRequest for sending time till match: {e}")
 
-# TODO: why is the FPS 5 here?
 class VideoRecorder:
     def __init__(self, debug: bool = False, width: int = 1920, height: int = 1080, fps: int = 5):
         self.debug: bool = debug
         self.conf: AFLConfig =AFLConfig()
-        self.fps: int = 30
+        self.fps: int = FPS_CONSTANT
         self.width: int = width
         self.height: int = height
         self.frame_size: Tuple[int, int] = (self.width, self.height)
@@ -181,12 +184,14 @@ class VideoRecorder:
         cv2.destroyAllWindows()
         print("Video saved to", video_name)
 
-    @staticmethod
-    def wait_for_match_to_start(seconds_till_match: int) -> bool:
+    def wait_for_match_to_start(self, seconds_till_match: int) -> bool:
         """Waits for the match to start"""
         time_till_match_starts = time.time() + seconds_till_match
         while time.time() < time_till_match_starts:
             print("waiting for match to start")
+            with open(TIME_TILL_MATCH_TXT_FILE, "w") as file:
+                remaining_time = int(time_till_match_starts - time.time())
+                file.write(str(remaining_time))
             time.sleep(1)
         return True
 
@@ -197,12 +202,12 @@ class VideoRecorder:
         check_and_create_dir(path)
 
         seconds_till_match = self.get_seconds_till_match()
-        device_name = os.getenv("DEVICE_NAME", "jetson1")
+        device_name = os.environ.get("DEVICE_NAME", "jetson1")
         data = {
             "deviceId": device_name,
             "time_till_match_starts": seconds_till_match
         }
-        ServerRequest.post(data)
+        ServerRequest.post(data)  # Initially send data to web app
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
         for i in range(3):

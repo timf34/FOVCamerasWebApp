@@ -32,6 +32,8 @@ URL = os.environ.get('REACT_APP_URL')
 if URL.startswith('https'):
     print("Warning: URL starts with https. We are generally using http for local development.")
 
+TIME_TILL_MATCH_TXT_FILE: str = "./time_till_match.txt"
+
 
 def get_wifi_status() -> bool:
     # randomly return True or False
@@ -133,6 +135,30 @@ class NamespaceHandler(Client):
             input_data.encode())  # stdin expects bytes, so encode the string as bytes
             self.process["start_camera_control"].stdin.flush()  # flush the buffer to make sure the data is actually sent to the subprocess
 
+    @staticmethod
+    def on_fetch_time_till_match():
+        print('Received fetch_time_till_match command')
+        try:
+            with open(TIME_TILL_MATCH_TXT_FILE, 'r') as file:
+                time_till_match = file.read().strip()
+            sio.emit('time_till_match_response', {
+                'deviceId': deviceId,
+                'time_till_match': time_till_match
+            })
+        except Exception as e:
+            print(f"Error reading time till match: {e}")
+
+
+    @staticmethod
+    def send_time_till_match(self) -> None:
+        """
+        Reads TIME_TILL_MATCH_TXT_FILE and sends the contents to the server once
+        """
+        if os.path.exists(TIME_TILL_MATCH_TXT_FILE):
+            with open(TIME_TILL_MATCH_TXT_FILE, 'r') as f:
+                time_till_match = f.read()
+                sio.emit('time_till_match', time_till_match)
+
 
 # Device ID as a command line argument
 if len(sys.argv) != 2:
@@ -161,6 +187,8 @@ sio.on('start_record_video', sio.on_start_record_video)
 sio.on('stop_record_video', sio.on_stop_record_video)
 sio.on('start_s3_sync', sio.on_start_s3_sync)
 sio.on('stop_s3_sync', sio.on_stop_s3_sync)
+sio.on('fetch_time_till_match', sio.on_fetch_time_till_match)
+
 
 # Emit the device_id event
 sio.emit('device_id', deviceId)  # This is called when the server is running already when we connect

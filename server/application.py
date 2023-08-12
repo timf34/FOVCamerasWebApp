@@ -87,35 +87,35 @@ def create_app():
 
     @app.route('/api/start-camera', methods=['POST'])
     def handle_start_camera_control():
-        return handle_device_command('start_camera_control', "Camera control start command sent", server=server)
+        return handle_device_command('start_camera_control', "Camera control start command sent", _server=server)
 
     @app.route('/api/stop-camera', methods=['POST'])
     def handle_stop_camera_control():
-        return handle_device_command('stop_camera_control', "Camera control stop command sent", server=server)
+        return handle_device_command('stop_camera_control', "Camera control stop command sent", _server=server)
 
     @app.route('/api/start-camera-stream', methods=['POST'])
     def handle_start_camera_stream():
-        return handle_device_command('start_camera_stream', "Camera stream start command sent", server=server)
+        return handle_device_command('start_camera_stream', "Camera stream start command sent", _server=server)
 
     @app.route('/api/stop-camera-stream', methods=['POST'])
     def handle_stop_camera_stream():
-        return handle_device_command('stop_camera_stream', "Camera stream stop command sent", server=server)
+        return handle_device_command('stop_camera_stream', "Camera stream stop command sent", _server=server)
     
     @app.route('/api/start-record-video', methods=['POST'])
     def handle_start_record_video():
-        return handle_device_command('start_record_video', "Record video start command sent", server=server)
+        return handle_device_command('start_record_video', "Record video start command sent", _server=server)
 
     @app.route('/api/stop-record-video', methods=['POST'])
     def handle_stop_record_video():
-        return handle_device_command('stop_record_video', "Record video stop command sent", server=server)
+        return handle_device_command('stop_record_video', "Record video stop command sent", _server=server)
         
     @app.route('/api/start-s3-sync', methods=['POST'])
     def handle_start_s3_sync():
-        return handle_device_command('start_s3_sync', "Record video start command sent", server=server)
+        return handle_device_command('start_s3_sync', "Record video start command sent", _server=server)
 
     @app.route('/api/stop-s3-sync', methods=['POST'])
     def handle_stop_s3_sync():
-        return handle_device_command('stop_s3_sync', "Record video stop command sent", server=server)
+        return handle_device_command('stop_s3_sync', "Record video stop command sent", _server=server)
     
     # TODO: not sure what this func does
     @app.route('/api/send-input', methods=['POST'])
@@ -171,30 +171,27 @@ def create_app():
         else:
             return jsonify(
                 {"status": "failure", "message": f"No motor positions received yet for device {device_id}"}), 400
-    
-    @app.route('/api/time-till-match', methods=['POST'])
-    def get_time_till_match():
-        global last_received_time_till_match
-        try:
-            data = request.get_json()
-            if not data or 'deviceId' not in data:
-                raise ValueError("Invalid request data")
-            deviceId = data['deviceId']
-            print("Time till match: \n", data)
-            last_received_time_till_match[deviceId] = data  # save data for this device
-            return jsonify(data), 200
-        except Exception as e:
-            print(f"Error in get_time_till_match: {e}")
-            return jsonify({"status": "failure", "message": str(e)}), 400
 
-    @app.route('/api/get-time-till-match/<device_id>', methods=['GET'])
-    def send_time_till_match(device_id):
-        global last_received_time_till_match
-        if device_id in last_received_time_till_match:
-            return jsonify(last_received_time_till_match[device_id]), 200
+
+    @app.route('/api/get-time-till-match/<deviceId>', methods=['GET'])
+    def get_time_till_match(deviceId):
+        if deviceId in server.connections:
+            socketio.emit('fetch_time_till_match', room=server.connections[deviceId])
+            # Here, we're making an assumption that the IoT device will respond within 5 seconds. Adjust this as needed.
+            timeout = 10
+            start_time = datetime.now()
+            while datetime.now() - start_time < timedelta(seconds=timeout):
+                if deviceId in last_received_time_till_match:
+                    return jsonify(last_received_time_till_match[deviceId]), 200
+                socketio.sleep(1)
+            return jsonify({"message": "No response from device"}), 400
         else:
-            return jsonify(
-                {"status": "failure", "message": f"No time till match data received yet for device {device_id}"}), 400
+            return jsonify({"message": "Device not connected"}), 400
+
+    @socketio.on('time_till_match_response')
+    def handle_time_till_match_response(data):
+        deviceId = data['deviceId']
+        last_received_time_till_match[deviceId] = data['time_till_match']
 
     @socketio.on('frame')
     def handle_frame(data):

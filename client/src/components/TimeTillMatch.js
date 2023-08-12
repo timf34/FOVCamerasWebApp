@@ -20,16 +20,15 @@ function TimeTillMatch() {
     }, [deviceId]);
 
     return (
-        <div className="container">
-            <h5>Time Till Match</h5>
-            <div className="pre">
-                {Object.entries(response).map(([key, value], i) => (
-                    <p key={i}><b>{key}:</b> {value}</p>
-                ))}
-            </div>
-            <button className="button" onClick={fetchTimeTillMatch}>Refresh</button>
-        </div>
-    );
+    <div className="container">
+        <h5>Time Till Match</h5>
+        <div className="pre">
+    {JSON.stringify(response)}
+</div>
+        <button className="button" onClick={fetchTimeTillMatch}>Refresh</button>
+    </div>
+);
+
 }
 
 export default TimeTillMatch;
