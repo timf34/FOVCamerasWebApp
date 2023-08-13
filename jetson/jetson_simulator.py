@@ -85,7 +85,10 @@ class NamespaceHandler(Client):
     @staticmethod
     def on_command(data) -> None:  # This function listens for the 'command' event
         print('Received command:', data)
-    
+
+    def is_command_running(self, command: str) -> bool:
+        return command in self.process and self.process[command].poll() is None
+
     def start_command(self, command: str) -> None:
         print(f'Received {command} command')
         if command not in self.process or self.process[command].poll() is not None:
@@ -106,7 +109,7 @@ class NamespaceHandler(Client):
             self.process[command].wait()
             if os.path.exists(self.pid_file_path):
                 os.remove(self.pid_file_path)
-                
+
     def on_start_camera_control(self) -> None:
         self.start_command('start_camera_control')
 
@@ -114,6 +117,10 @@ class NamespaceHandler(Client):
         self.stop_command('start_camera_control')
 
     def on_start_record_video(self) -> None:
+        # Check if video_stream is running
+        if self.is_command_running("start_camera_stream"):
+            print("Stopping video stream to start video recording...")
+            self.stop_command("start_camera_stream")
         self.start_command("start_record_video")
 
     def on_stop_record_video(self) -> None:
@@ -121,6 +128,10 @@ class NamespaceHandler(Client):
         write_to_text_file("Stopped recording", TIME_TILL_MATCH_TXT_FILE)
 
     def on_start_camera_stream(self) -> None:
+        # Check if record_video is running
+        if self.is_command_running("start_record_video"):
+            print("Video recording is in progress. Cannot start video stream!")
+            return
         self.start_command("start_camera_stream")
 
     def on_stop_camera_stream(self) -> None:
