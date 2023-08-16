@@ -10,7 +10,7 @@ const ServerImage = () => {
 
     useEffect(() => {
         fetchImage();
-        const interval = setInterval(fetchImage, 50);
+        const interval = setInterval(fetchImage, 500);
 
         // Clean up the interval on unmount
         return () => clearInterval(interval);
