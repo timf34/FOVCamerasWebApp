@@ -114,7 +114,7 @@ class VideoRecorder:
     def get_timeout(self, timeout_minute_length: float = 22.5) -> int:
         """Return the time in seconds that the video should be recorded for (default is 22.5 minutes)"""
         if self.debug is True:
-            return int(time.time() + 10)  # 10-second video if in debug mode
+            return int(time.time() + 60)  # 60-second video if in debug mode
         else:
             return int(time.time() + (timeout_minute_length * 60))
 
