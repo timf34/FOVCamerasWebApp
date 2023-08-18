@@ -21,8 +21,9 @@ URL = os.environ.get('REACT_APP_URL')
 DEVICE_ID = os.environ.get('DEVICE_NAME', 'jetson1')
 
 DEBUG: bool = False
-FPS_CONSTANT: int = 30
+FPS_CONSTANT: int = 60
 TIME_TILL_MATCH_TXT_FILE: str = "./time_till_match.txt"
+AFL_VIDEO_TIME_MINS: int = 30  # length of individual videos in mins
 
 def write_to_text_file(data: str, file_name: str) -> None:
     try:
@@ -197,10 +198,16 @@ class VideoRecorder:
         self.wait_for_match_to_start(seconds_till_match)  # Blocks until the match starts
 
         write_to_text_file("Started recording", TIME_TILL_MATCH_TXT_FILE)
-        for i in range(3):
-            self.record_video(video_length_mins=1, video_path=path)
-            if self.debug is True and i == 0: 
-                break 
+        for i in range(6):
+            if self.debug is True and i == 0:
+                self.record_video(video_length_mins=2, video_path=path)
+                break
+            else:
+                self.record_video(video_length_mins=AFL_VIDEO_TIME_MINS, video_path=path)
+
+
+
+
 
 
 def main():
