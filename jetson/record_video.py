@@ -21,7 +21,7 @@ URL = os.environ.get('REACT_APP_URL')
 DEVICE_ID = os.environ.get('DEVICE_NAME', 'jetson1')
 
 DEBUG: bool = False
-FPS_CONSTANT: int = 60
+FPS_CONSTANT: int = 30
 TIME_TILL_MATCH_TXT_FILE: str = "./time_till_match.txt"
 AFL_VIDEO_TIME_MINS: int = 30  # length of individual videos in mins
 
