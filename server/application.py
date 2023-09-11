@@ -111,11 +111,11 @@ def create_app():
         
     @app.route('/api/start-s3-sync', methods=['POST'])
     def handle_start_s3_sync():
-        return handle_device_command('start_s3_sync', "Record video start command sent", _server=server)
+        return handle_device_command('start_s3_sync', "S3 sync start command sent", _server=server)
 
     @app.route('/api/stop-s3-sync', methods=['POST'])
     def handle_stop_s3_sync():
-        return handle_device_command('stop_s3_sync', "Record video stop command sent", _server=server)
+        return handle_device_command('stop_s3_sync', "S3 sync stop command sent", _server=server)
     
     # TODO: not sure what this func does
     @app.route('/api/send-input', methods=['POST'])
