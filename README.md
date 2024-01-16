@@ -7,7 +7,7 @@ This project provides a dashboard for monitoring multiple Nvidia Jetson Nano dev
 The project is divided into two parts:
 
 1. `client`: This directory contains the React application.
-2. `server`: This directory contains the Express.js server that serves the API used by the client.
+2. `server`: This directory contains the server that serves the API used by the client.
 
 ## Prerequisites
 
@@ -93,6 +93,16 @@ The server will run on [http://localhost:5000](http://localhost:5000).
     ```
 
 The application will run on [http://localhost:3000](http://localhost:3000) if you're using the Node.js server, or [http://localhost:5000](http://localhost:5000) if you're using the Python server.
+
+### The Client code is served from the server 
+
+Note that in our current setup, we serve the client code from the server (i.e. from `/build`). To update this, do the following:
+
+1. Build the client code 
+   1. `cd client`
+   2. `npm run build`
+   3. Copy and paste the resulting `/build` directory in `/client` into the root directory of `/server`
+   4. We can now serve the client code from the server:)  
 
 ## Testing
 
