@@ -51,7 +51,7 @@ For Python server:
         ```
       - Activate the venv:
         ```bash
-         env\Scripts\activate
+        venv\Scripts\activate
         ```
     - Linux/macOS:
       - Create a venv:
