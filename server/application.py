@@ -7,7 +7,6 @@ import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from firebase_admin import db
 from server import Server
 from time import time
 
@@ -230,11 +229,6 @@ def create_app():
                         print(f"Sending status update for device {deviceId}.")  # For debugging
                         app.logger.info(f"Sending status update for device {deviceId}.")  # For debugging
                         socketio.emit('status', {deviceId: device['status']})
-                if server.enable_db_uploading:
-                    # Push the status update to Firebase
-                    print(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
-                    app.logger.info(f"Pushing status update for device {deviceId} to Firebase.")  # For debugging
-                    # server.db.reference('statuses').child(deviceId).set(device)  # Note: commenting out to speed up dev. Code is getting stuck initializing db
 
             socketio.sleep(5)  # Sleep for 2 seconds
 
