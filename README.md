@@ -4,40 +4,33 @@ This project provides a dashboard for monitoring multiple Nvidia Jetson Nano dev
 
 ## Project Structure
 
-The project is divided into two parts:
+The project is divided into three parts:
 
-1. `client`: This directory contains the React application.
-2. `server`: This directory contains the server that serves the API used by the client.
-
-## Prerequisites
-
-1. [Node.js](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/get-npm) (comes with Node.js) should be installed.
-2. [Python](https://www.python.org/downloads/) (if you're using the Python server)
+1. `client`: This directory contains the frontend React application.
+2. `server`: This directory contains the server code that serves the client and handles the API requests.
+3. `jetson`: This directory contains the Python script that runs on the Jetson devices
 
 ## Development
 
-### Starting the Server
+### Server
 
-<!-- For Node.js server:
+#### Local: Running Flask server through Gunicorn (simulating production)
 
-1. Navigate into the `server` directory from the terminal:
+1. Use **WSL** to navigate into the `server` directory from the terminal:
     ```bash
     cd server
     ```
-2. Install the necessary packages:
+2. Create activate a virtual environment (venv):
+3. Activate the venv (if not already activated):
     ```bash
-    npm install
+    source wsl_venv/bin/activate
     ```
-3. Start the server:
+4. Run gunicorn server:
     ```bash
-    node server.js
-    ```
+   gunicorn -k eventlet -w 1 application:application
+   ```
 
-The server will run on [http://localhost:3000](http://localhost:3000). -->
-
-For Python server:
-
-**Note that you need to run this through the venv! Otherwise the server doesn't work and gets stuck in the backgroun tasks func**
+#### Local: Running Flask directly
 
 1. Navigate into the `server` directory from the terminal:
     ```bash
@@ -77,7 +70,21 @@ For Python server:
 
 The server will run on [http://localhost:5000](http://localhost:5000).
 
-### Starting the Client
+
+### Client
+
+#### Serving the Client from the Server
+
+1. Build ReactJS client
+    - `cd client`
+    - `npm run build`
+1. Move build folder to server folder
+    - `mv build/ server/`
+    - Or just copy, paste, etc.
+1. Start the server as shown above. 
+
+
+#### Starting the Client Directly (without the server)
 
 1. Navigate into the `client` directory from the terminal:
     ```bash
@@ -92,7 +99,7 @@ The server will run on [http://localhost:5000](http://localhost:5000).
     npm start
     ```
 
-The application will run on [http://localhost:3000](http://localhost:3000) if you're using the Node.js server, or [http://localhost:5000](http://localhost:5000) if you're using the Python server.
+## Older notes 
 
 ### The Client code is served from the server 
 
@@ -106,7 +113,7 @@ Note that in our current setup, we serve the client code from the server (i.e. f
 
 ## Testing
 
-You can test the server by navigating to the `/api/status` endpoint (e.g., [http://localhost:3000/api/status](http://localhost:3000/api/status)) in your web browser. You should see a JSON object with the status of the Jetson device.
+You can test the server by navigating to the `/api/status` endpoint (e.g., [http://localhost:5000/api/status](http://localhost:3000/api/status)) in your web browser. You should see a JSON object with the status of the Jetson device.
 
 ## Running 
 
@@ -153,71 +160,16 @@ To deploy it on AWS, use:
 REACT_APP_URL=http://fovcameraswebappv2.eu-west-1.elasticbeanstalk.com
 ```
 
+### Deploying to AWS EB
 
-```
-fov-cameras-web-app
-├─ .gitignore
-├─ .vscode
-│  └─ settings.json
-├─ client
-│  ├─ .env
-│  ├─ package-lock.json
-│  ├─ package.json
-│  ├─ public
-│  │  ├─ favicon.ico
-│  │  ├─ index.html
-│  │  ├─ logo192.png
-│  │  ├─ logo512.png
-│  │  ├─ manifest.json
-│  │  └─ robots.txt
-│  ├─ README.md
-│  └─ src
-│     ├─ components
-│     │  ├─ App.js
-│     │  ├─ firebase.js
-│     │  ├─ Login.js
-│     │  ├─ MotorControlForm.js
-│     │  ├─ MotorPositions.js
-│     │  ├─ ServerImage.js
-│     │  ├─ StartStopCameraControl.js
-│     │  ├─ StartStopCameraStream.js
-│     │  ├─ StatusList.js
-│     │  ├─ useAuth.js
-│     │  ├─ useSendCommand.js
-│     │  └─ useStatus.js
-│     ├─ index.js
-│     └─ stylesheets
-│        ├─ App.css
-│        ├─ MotorPositions.css
-│        └─ StatusList.css
-├─ flowcharts
-│  └─ flowchart.drawio
-├─ jetson
-|  ├─ .env
-│  ├─ camera_control_pid.txt
-│  ├─ ip_address.txt
-│  ├─ jetson_stream_simulator.py
-│  ├─ learning
-│  │  ├─ hello_world.py
-│  │  ├─ number_input_loop.py
-│  │  └─ while_hello_world.py
-│  ├─ nano_requirements.txt
-│  └─ stepperTests.py
-├─ README.md
-└─ server
-   ├─ .env
-   ├─ .dockerignore
-   ├─ .ebextensions
-   │  └─ python.config
-   ├─ .gitignore
-   ├─ app.zip
-   ├─ application.py
-   ├─ application_old.py
-   ├─ Dockerfile
-   ├─ notes.md
-   ├─ Procfile
-   ├─ requirements.txt
-   ├─ server.py
-   ├─ stream_manager.py
-   └─ __pycache__
-```
+1. Build ReactJS client
+    - `cd client`
+    - `npm run build`
+1. Move build folder to server folder
+    - `mv build/ server/`
+    - Or just copy, paste, etc.
+1. Create a zip file of the server folder
+    - `zip -r server.zip server/`
+    - Or just right click and compress
+        - Ensure to not select the `Dockerfile`, `/venv`, `/aws_zips` or `.dockerignore` when compressing
+    - _Note: Don't include the following directories or files: `Dockerfile`, `venv`, `pycache`, `.dockerignore` when zipping._

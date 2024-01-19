@@ -1,3 +1,11 @@
+## WSL 
+
+We can run the gunicorn server on WSL, so use that! It should mimic AWS EB now. No need to use Docker:)
+
+
+
+## Old notes 
+
 GStreamer script for streaming to laptop via GStreamer from laptop:
 
 *Note that you need to run it from Powershell! Not CMD!*
